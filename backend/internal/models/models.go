@@ -1,0 +1,33 @@
+package models
+
+import (
+	"time"
+)
+
+type User struct {
+	ID        int64     `json:"id" db:"id"`
+	Name      string    `json:"name" db:"name"`
+	Email     string    `json:"email" db:"email"`
+	Password  string    `json:"-" db:"password_hash"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// Categoria da transação (ex: Alimentação, Transporte)
+type Category struct {
+	ID     int64  `json:"id" db:"id"`
+	UserID int64  `json:"user_id" db:"user_id"` // Categoria pode ser custom do Usuário
+	Name   string `json:"name" db:"name"`
+}
+
+type Transaction struct {
+	ID          int64     `json:"id" db:"id"`
+	UserID      int64     `json:"user_id" db:"user_id"`
+	CategoryID  int64     `json:"category_id" db:"category_id"`
+	Type        string    `json:"type" db:"type"` // "income" ou "expense"
+	Amount      float64   `json:"amount" db:"amount"`
+	Description string    `json:"description,omitempty" db:"description"`
+	Date        time.Time `json:"date" db:"date"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+}
