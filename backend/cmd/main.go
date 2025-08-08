@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/daviolvr/Fintrack/internal/handlers"
 	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/daviolvr/Fintrack/internal/router"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,8 +20,7 @@ func main() {
 
 	r := gin.Default()
 
-	authHandler := handlers.NewAuthHandler(db)
-	r.POST("/register", authHandler.Register)
+	router.SetupRoutes(r, db)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
