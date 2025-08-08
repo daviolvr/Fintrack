@@ -19,9 +19,10 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 }
 
 type RegisterInput struct {
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+	Email     string `json:"email" binding:"required,email"`
+	Password  string `json:"password" binding:"required,min=6"`
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -40,9 +41,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	user := models.User{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: hashedPassword,
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Email:     input.Email,
+		Password:  hashedPassword,
 	}
 
 	if err := repository.CreateUser(h.DB, &user); err != nil {
