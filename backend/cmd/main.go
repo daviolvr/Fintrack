@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"os"
 
 	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -16,5 +17,17 @@ func main() {
 	}
 	defer db.Close()
 
-	fmt.Println("Conexão com o banco de dados bem-sucedida!")
+	r := gin.Default()
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // default
+	}
+
+	log.Printf("Servidor rodando em http://localhost:%s\n", port)
+	r.Run(":" + port)
 }
