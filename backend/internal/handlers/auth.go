@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/daviolvr/Fintrack/internal/auth"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/services"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -83,7 +85,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Gera token
-	token, err := services.GenerateJWT(user.ID)
+	token, err := auth.GenerateJWT(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar token"})
 		return
