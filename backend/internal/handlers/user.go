@@ -20,17 +20,15 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 
 // Lista dados do usuário
 func (h *UserHandler) Me(c *gin.Context) {
-	userIDInterface, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+	userID, err := services.GetUserID(c)
+	if err != nil {
+		services.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	userID := userIDInterface.(int64)
-
 	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar usuário"})
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
 		return
 	}
 
@@ -44,9 +42,9 @@ func (h *UserHandler) Me(c *gin.Context) {
 
 // Atualiza dados do usuário
 func (h *UserHandler) Update(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+	userID, err := services.GetUserID(c)
+	if err != nil {
+		services.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -55,38 +53,35 @@ func (h *UserHandler) Update(c *gin.Context) {
 		LastName  string `json:"last_name"`
 		Email     string `json:"email"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
+	if !services.BindJSON(c, &input) {
 		return
 	}
 
 	user := models.User{
-		ID:        userID.(int64),
+		ID:        userID,
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 		Email:     input.Email,
 	}
 
-	err := repository.UpdateUser(h.DB, &user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar usuário"})
+	if err := repository.UpdateUser(h.DB, &user); err != nil {
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar usuário")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Usuário atualizado com sucesso"})
+	services.RespondMessage(c, "Usuário atualizado com sucesso")
 }
 
 // Deleta o usuário
 func (h *UserHandler) Delete(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+	userID, err := services.GetUserID(c)
+	if err != nil {
+		services.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	err := repository.DeleteUser(h.DB, userID.(int64))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar usuário"})
+	if err := repository.DeleteUser(h.DB, userID); err != nil {
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao deletar usuário")
 		return
 	}
 
@@ -95,9 +90,9 @@ func (h *UserHandler) Delete(c *gin.Context) {
 
 // Atualiza a senha do usuário
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+	userID, err := services.GetUserID(c)
+	if err != nil {
+		services.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -105,41 +100,36 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		Password    string `json:"password"`
 		NewPassword string `json:"new_password"`
 	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
+	if !services.BindJSON(c, &input) {
 		return
 	}
 
-	user, err := repository.FindUserByID(h.DB, userID.(int64))
+	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não identificado"})
+		services.RespondError(c, http.StatusUnauthorized, "Usuário não identificado")
 		return
 	}
 
 	if !services.CheckPasswordHash(input.Password, user.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Senha incorreta"})
+		services.RespondError(c, http.StatusUnauthorized, "Senha incorreta")
 		return
 	}
 
-	// Hasheia a nova senha
 	hashedPassword, err := services.HashPassword(input.NewPassword)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao hashear senha"})
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao hashear senha")
 		return
 	}
 
-	updated_user := models.User{
-		ID:       userID.(int64),
+	updatedUser := models.User{
+		ID:       userID,
 		Password: hashedPassword,
 	}
 
-	if err := repository.UpdatePassword(h.DB, &updated_user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar senha do usuário"})
+	if err := repository.UpdatePassword(h.DB, &updatedUser); err != nil {
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar senha do usuário")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Usuário atualizado com sucesso",
-	})
+	services.RespondMessage(c, "Usuário atualizado com sucesso")
 }
