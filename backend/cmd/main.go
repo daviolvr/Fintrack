@@ -22,10 +22,6 @@ func main() {
 
 	router.SetupRoutes(r, db)
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "pong"})
-	})
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // default

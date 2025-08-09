@@ -47,3 +47,21 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, category)
 }
+
+// Listar categorias do usuário
+func (h *CategoryHandler) List(c *gin.Context) {
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+		return
+	}
+	userID := userIDValue.(int64)
+
+	categories, err := repository.FindCategoriesByUser(h.DB, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao listar categorias"})
+		return
+	}
+
+	c.JSON(http.StatusOK, categories)
+}
