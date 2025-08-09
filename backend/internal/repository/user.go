@@ -37,3 +37,26 @@ func FindUserByEmail(db *sql.DB, email string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func FindUserByID(db *sql.DB, id int64) (*models.User, error) {
+	query := `SELECT id, first_name, last_name, email, password_hash, created_at, updated_at
+	FROM users WHERE id = $1`
+
+	row := db.QueryRow(query, id)
+
+	var user models.User
+	err := row.Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
