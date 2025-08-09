@@ -15,4 +15,5 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	r.POST("/api/v1/register", authHandler.Register)
 	r.POST("/api/v1/login", authHandler.Login)
 	r.GET("/api/v1/me", middlewares.AuthMiddleware(), userHandler.Me)
+	r.PUT("/api/v1/me", middlewares.AuthMiddleware(), userHandler.Update)
 }

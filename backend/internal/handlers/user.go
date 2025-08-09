@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -37,4 +38,37 @@ func (h *UserHandler) Me(c *gin.Context) {
 		"email":      user.Email,
 		"created_at": user.CreatedAt,
 	})
+}
+
+func (h *UserHandler) Update(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+		return
+	}
+
+	var input struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Email     string `json:"email"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
+		return
+	}
+
+	user := models.User{
+		ID:        userID.(int64),
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Email:     input.Email,
+	}
+
+	err := repository.UpdateUser(h.DB, &user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar usuário"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Usuário atualizado com sucesso"})
 }
