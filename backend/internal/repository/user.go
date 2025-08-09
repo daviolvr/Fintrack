@@ -68,8 +68,8 @@ func UpdateUser(db *sql.DB, user *models.User) error {
 	return err
 }
 
-// func DeleteUser(db *sql.DB, id int64) error {
-// 	query := `DELETE from users WHERE id = $1`
-// 	_, err := db.Exec(query, id)
-// 	return err
-// }
+func DeleteUser(db *sql.DB, id int64) error {
+	query := `DELETE from users WHERE id = $1`
+	_, err := db.Exec(query, id)
+	return err
+}

@@ -72,3 +72,19 @@ func (h *UserHandler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Usuário atualizado com sucesso"})
 }
+
+func (h *UserHandler) Delete(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+		return
+	}
+
+	err := repository.DeleteUser(h.DB, userID.(int64))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar usuário"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
