@@ -32,3 +32,22 @@ func FindCategoriesByUser(db *sql.DB, userID int64) ([]models.Category, error) {
 
 	return categories, nil
 }
+
+// Atualiza categoria pelo ID e user_id
+func UpdateCategory(db *sql.DB, category *models.Category) error {
+	query := `UPDATE categories SET name = $1 WHERE id = $2 AND user_id = $3`
+	result, err := db.Exec(query, category.Name, category.ID, category.UserID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

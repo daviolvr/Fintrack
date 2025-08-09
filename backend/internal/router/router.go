@@ -26,4 +26,5 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// Rotas de categories
 	v1.POST("/categories", categoryHandler.Create)
 	v1.GET("/categories", categoryHandler.List)
+	v1.PUT("/categories/:id", categoryHandler.Update)
 }
