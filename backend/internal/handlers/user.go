@@ -107,18 +107,30 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
+	user, err := repository.FindUserByID(h.DB, userID.(int64))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não identificado"})
+		return
+	}
+
+	if !services.CheckPasswordHash(input.Password, user.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Senha incorreta"})
+		return
+	}
+
+	// Hasheia a nova senha
 	hashedPassword, err := services.HashPassword(input.NewPassword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao hashear senha"})
 		return
 	}
 
-	user := models.User{
+	updated_user := models.User{
 		ID:       userID.(int64),
 		Password: hashedPassword,
 	}
 
-	if err := repository.UpdatePassword(h.DB, &user); err != nil {
+	if err := repository.UpdatePassword(h.DB, &updated_user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar senha do usuário"})
 		return
 	}
