@@ -11,11 +11,18 @@ import (
 func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	authHandler := handlers.NewAuthHandler(db)
 	userHandler := handlers.NewUserHandler(db)
+	categoryHandler := handlers.NewCategoryHandler(db)
 
-	r.POST("/api/v1/register", authHandler.Register)
-	r.POST("/api/v1/login", authHandler.Login)
-	r.GET("/api/v1/me", middlewares.AuthMiddleware(), userHandler.Me)
-	r.PUT("/api/v1/me", middlewares.AuthMiddleware(), userHandler.Update)
-	r.DELETE("/api/v1/me", middlewares.AuthMiddleware(), userHandler.Delete)
-	r.PUT("/api/v1/me/change_password", middlewares.AuthMiddleware(), userHandler.UpdatePassword)
+	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
+
+	// Rotas de user
+	v1.POST("/register", authHandler.Register)
+	v1.POST("/login", authHandler.Login)
+	v1.GET("/me", userHandler.Me)
+	v1.PUT("/me", userHandler.Update)
+	v1.DELETE("/me", userHandler.Delete)
+	v1.PUT("/change_password", userHandler.UpdatePassword)
+
+	// Rotas de categories
+	v1.POST("/categories", categoryHandler.Create)
 }
