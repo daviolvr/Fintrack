@@ -16,8 +16,8 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
 
 	// Rotas de user
-	r.POST("/register", authHandler.Register)
-	r.POST("/login", authHandler.Login)
+	r.POST("/api/v1/register", authHandler.Register)
+	r.POST("/api/v1/login", authHandler.Login)
 	v1.GET("/me", userHandler.Me)
 	v1.PUT("/me", userHandler.Update)
 	v1.DELETE("/me", userHandler.Delete)
@@ -27,4 +27,5 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	v1.POST("/categories", categoryHandler.Create)
 	v1.GET("/categories", categoryHandler.List)
 	v1.PUT("/categories/:id", categoryHandler.Update)
+	v1.DELETE("/categories/:id", categoryHandler.Delete)
 }

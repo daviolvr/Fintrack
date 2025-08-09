@@ -18,6 +18,7 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 	return &UserHandler{DB: db}
 }
 
+// Lista dados do usuário
 func (h *UserHandler) Me(c *gin.Context) {
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
@@ -41,6 +42,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 	})
 }
 
+// Atualiza dados do usuário
 func (h *UserHandler) Update(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -74,6 +76,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Usuário atualizado com sucesso"})
 }
 
+// Deleta o usuário
 func (h *UserHandler) Delete(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -90,6 +93,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// Atualiza a senha do usuário
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {

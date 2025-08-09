@@ -51,3 +51,22 @@ func UpdateCategory(db *sql.DB, category *models.Category) error {
 
 	return nil
 }
+
+// Deleta categoria pelo ID e user_id
+func DeleteCategory(db *sql.DB, id int64, userID int64) error {
+	query := `DELETE FROM categories WHERE id = $1 AND user_id = $2`
+	result, err := db.Exec(query, id, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

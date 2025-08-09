@@ -109,3 +109,31 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, category)
 }
+
+// Deletar categoria
+func (h *CategoryHandler) Delete(c *gin.Context) {
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuário não autenticado"})
+		return
+	}
+	userID := userIDValue.(int64)
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		return
+	}
+
+	if err := repository.DeleteCategory(h.DB, id, userID); err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Categoria não encontrada"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar categoria"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
