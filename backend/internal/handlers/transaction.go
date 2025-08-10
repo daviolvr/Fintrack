@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/models"
@@ -59,4 +60,54 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, transaction)
+}
+
+// Lista as transações por usuário
+func (h *TransactionHandler) List(c *gin.Context) {
+	userID, err := services.GetUserID(c)
+	if err != nil {
+		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	// Lê parâmetros de filtro da query string
+	var fromDatePtr *time.Time
+	if from := c.Query("from_date"); from != "" {
+		if parsed, err := time.Parse("2006-01-02", from); err == nil {
+			fromDatePtr = &parsed
+		} else {
+			services.RespondError(c, http.StatusBadRequest, "Formato de from_date inválido")
+			return
+		}
+	}
+
+	var toDatePtr *time.Time
+	if to := c.Query("to_date"); to != "" {
+		if parsed, err := time.Parse("2006-01-02", to); err == nil {
+			toDatePtr = &parsed
+		} else {
+			services.RespondError(c, http.StatusBadRequest, "Formato de to_date inválido")
+			return
+		}
+	}
+
+	var categoryIDPtr *int64
+	if cat := c.Query("category_id"); cat != "" {
+		if parsed, err := strconv.ParseInt(cat, 10, 64); err == nil {
+			categoryIDPtr = &parsed
+		} else {
+			services.RespondError(c, http.StatusBadRequest, "category_id inválido")
+			return
+		}
+	}
+
+	// Busca no banco
+	transactions, err := repository.FindTransactionsByUser(h.DB, userID, fromDatePtr, toDatePtr, categoryIDPtr)
+	if err != nil {
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transações")
+		return
+	}
+
+	// Retorna JSON
+	c.JSON(http.StatusOK, transactions)
 }
