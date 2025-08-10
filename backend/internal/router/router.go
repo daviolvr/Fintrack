@@ -12,6 +12,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	authHandler := handlers.NewAuthHandler(db)
 	userHandler := handlers.NewUserHandler(db)
 	categoryHandler := handlers.NewCategoryHandler(db)
+	transactionHandler := handlers.NewTransactionHandler(db)
 
 	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
 
@@ -28,4 +29,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	v1.GET("/categories", categoryHandler.List)
 	v1.PUT("/categories/:id", categoryHandler.Update)
 	v1.DELETE("/categories/:id", categoryHandler.Delete)
+
+	// Rotas de transactions
+	v1.POST("/transactions", transactionHandler.Create)
 }
