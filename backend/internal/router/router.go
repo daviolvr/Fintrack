@@ -33,4 +33,5 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// Rotas de transactions
 	v1.POST("/transactions", transactionHandler.Create)
 	v1.GET("/transactions", transactionHandler.List)
+	v1.PUT("/transactions/:id", transactionHandler.Update)
 }

@@ -93,3 +93,40 @@ func FindTransactionsByUser(
 
 	return transactions, nil
 }
+
+// Atualiza uma transação pertencente a um usuário
+func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
+	query := `
+	UPDATE transactions
+	SET category_id = $1,
+		type = $2,
+		amount = $3,
+		description = $4,
+		date = $5,
+		updated_at = NOW()
+	WHERE id = $6 AND user_id = $7
+	`
+
+	result, err := db.Exec(query,
+		t.CategoryID,
+		t.Type,
+		t.Amount,
+		t.Description,
+		t.Date,
+		t.ID,
+		t.UserID,
+	)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
