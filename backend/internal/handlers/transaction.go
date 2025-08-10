@@ -168,3 +168,29 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 
 	services.RespondMessage(c, "Transação atualizada com sucesso")
 }
+
+// Deleta transação do usuário
+func (h *TransactionHandler) Delete(c *gin.Context) {
+	userID, err := services.GetUserID(c)
+	if err != nil {
+		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	transactionID, err := services.GetIDParam(c, "id")
+	if err != nil {
+		services.RespondError(c, http.StatusBadRequest, "ID da transação inválido")
+		return
+	}
+
+	err = repository.DeleteTransactionByUser(h.DB, userID, transactionID)
+	if err != nil {
+		if services.HandleNotFound(c, err, "Transação não encontrada") {
+			return
+		}
+		services.RespondError(c, http.StatusInternalServerError, "Erro ao deletar transação")
+		return
+	}
+
+	services.RespondMessage(c, "Transação deletada com sucesso")
+}

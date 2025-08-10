@@ -130,3 +130,27 @@ func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
 
 	return nil
 }
+
+// Deleta uma transação pelo ID e pelo userID
+func DeleteTransactionByUser(db *sql.DB, userID int64, transactionID int64) error {
+	query := `
+	DELETE FROM transactions
+	WHERE id = $1 AND user_id = $2
+	`
+
+	result, err := db.Exec(query, transactionID, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

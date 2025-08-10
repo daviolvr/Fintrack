@@ -98,7 +98,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, category)
+	services.RespondMessage(c, "Categoria atualizada com sucesso")
 }
 
 // Deletar categoria
