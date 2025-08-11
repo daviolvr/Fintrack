@@ -18,7 +18,18 @@ func NewCategoryHandler(db *sql.DB) *CategoryHandler {
 	return &CategoryHandler{DB: db}
 }
 
-// Criar categoria
+// @BasePath /api/v1
+// @Summary Cria uma categoria
+// @Description Cria uma categoria de transação
+// @Tags category
+// @Accept json
+// @Produce json
+// @Param name path string true "Nome da categoria"
+// @Success 201
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 501 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /categories [post]
 func (h *CategoryHandler) Create(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -46,7 +57,17 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, category)
 }
 
-// Listar categorias do usuário
+// @BasePath /api/v1
+// @Summary Lista as categorias
+// @Description Lista as categorias do usuário
+// @Tags category
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.CategoryListResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /categories [get]
 func (h *CategoryHandler) List(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -63,7 +84,19 @@ func (h *CategoryHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, categories)
 }
 
-// Atualizar categoria
+// @BasePath /api/v1
+// @Summary Atualiza uma categoria
+// @Description Atualiza uma categoria do usuário
+// @Tags category
+// @Accept json
+// @Produce json
+// @Param id path int true "ID da categoria"
+// @Success 200 {object} models.MessageResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /categories/{id} [put]
 func (h *CategoryHandler) Update(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -101,7 +134,20 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 	services.RespondMessage(c, "Categoria atualizada com sucesso")
 }
 
-// Deletar categoria
+// @BasePath /api/v1
+// @Summary Deleta uma categoria
+// @Description Deleta a categoria em questão
+// @Tags category
+// @Accept json
+// @Produce json
+// @Param id path int true "ID da categoria"
+// @Success 204
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /categories/{id} [delete]
 func (h *CategoryHandler) Delete(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {

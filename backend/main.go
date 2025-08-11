@@ -11,6 +11,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// Carrega o .env
 	_ = godotenv.Load()

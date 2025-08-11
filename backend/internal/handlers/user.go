@@ -27,6 +27,7 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 // @Success 200 {object} models.UserResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
 // @Router /users/me [get]
 func (h *UserHandler) Me(c *gin.Context) {
 	userID, err := services.GetUserID(c)
@@ -59,6 +60,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 // @Success 200 {object} models.MessageResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
 // @Router /users/me [put]
 func (h *UserHandler) Update(c *gin.Context) {
 	userID, err := services.GetUserID(c)
@@ -100,6 +102,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Success 204
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
 // @Router /users/me [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	userID, err := services.GetUserID(c)
@@ -124,6 +127,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Success 200 {object} models.MessageResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
 // @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	userID, err := services.GetUserID(c)

@@ -29,3 +29,13 @@ type UserChangePassword struct {
 	Password    string `json:"password"`
 	NewPassword string `json:"new_password"`
 }
+
+type CategoryCreateUpdateResponse struct {
+	Name string `json:"name"`
+}
+
+type CategoryListResponse struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+	Name   int64 `json:"name"`
+}
