@@ -18,7 +18,16 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 	return &UserHandler{DB: db}
 }
 
-// Lista dados do usuário
+// @BasePath /api/v1
+// @Summary Retorna dados do usuário
+// @Description Retorna os dados do usuário em questão
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.UserResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /users/me [get]
 func (h *UserHandler) Me(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -40,7 +49,17 @@ func (h *UserHandler) Me(c *gin.Context) {
 	})
 }
 
-// Atualiza dados do usuário
+// @BasePath /api/v1
+// @Summary Atualiza dados do usuário
+// @Description Atualiza dados do usuário em questão
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param user body models.UserUpdateInput true "Request body"
+// @Success 200 {object} models.MessageResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /users/me [put]
 func (h *UserHandler) Update(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -72,7 +91,16 @@ func (h *UserHandler) Update(c *gin.Context) {
 	services.RespondMessage(c, "Usuário atualizado com sucesso")
 }
 
-// Deleta o usuário
+// @BasePath /api/v1
+// @Summary Deleta um usuário
+// @Description Deleta o usuário em questão
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 204
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /users/me [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -88,7 +116,15 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// Atualiza a senha do usuário
+// @BasePath /api/v1
+// @Summary Atualiza a senha do usuário
+// @Description Atualiza a senha do usuário em questão
+// @Tags user
+// @Param user body models.UserChangePassword true "Request body"
+// @Success 200 {object} models.MessageResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {

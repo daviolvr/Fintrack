@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/daviolvr/Fintrack/docs"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/router"
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,12 @@ func main() {
 
 	// Seta as rotas
 	router.SetupRoutes(r, db)
+
+	// Configuraçẽos do Swagger
+	docs.SwaggerInfo.Title = "Fintrack API"
+	docs.SwaggerInfo.Description = "API para controle financeiro pessoal"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	// Tenta usar a porta do .env
 	// Caso não tenha porta no .env, usa default 8080

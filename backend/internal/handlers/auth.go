@@ -81,7 +81,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param user body LoginInput true "Request body with email and password"
+// @Param user body LoginInput true "Request body"
 // @Success 200 {object} models.MessageResponse
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse

@@ -36,6 +36,33 @@ definitions:
       message:
         type: string
     type: object
+  models.UserChangePassword:
+    properties:
+      new_password:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  models.UserUpdateInput:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -45,7 +72,7 @@ paths:
       - application/json
       description: Login de usuários no sistema
       parameters:
-      - description: Request body with email and password
+      - description: Request body
         in: body
         name: user
         required: true
@@ -103,4 +130,102 @@ paths:
       summary: Registra um usuário
       tags:
       - auth
+  /users/me:
+    delete:
+      consumes:
+      - application/json
+      description: Deleta o usuário em questão
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Deleta um usuário
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: Retorna os dados do usuário em questão
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Retorna dados do usuário
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Atualiza dados do usuário em questão
+      parameters:
+      - description: Request body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Atualiza dados do usuário
+      tags:
+      - user
+  /users/password:
+    put:
+      description: Atualiza a senha do usuário em questão
+      parameters:
+      - description: Request body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserChangePassword'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Atualiza a senha do usuário
+      tags:
+      - user
 swagger: "2.0"

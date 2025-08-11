@@ -3,7 +3,6 @@ package router
 import (
 	"database/sql"
 
-	docs "github.com/daviolvr/Fintrack/docs"
 	"github.com/daviolvr/Fintrack/internal/handlers"
 	"github.com/daviolvr/Fintrack/internal/middlewares"
 	"github.com/gin-gonic/gin"
@@ -17,13 +16,13 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	categoryHandler := handlers.NewCategoryHandler(db)
 	transactionHandler := handlers.NewTransactionHandler(db)
 
-	docs.SwaggerInfo.BasePath = "/api/v1"
-
 	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
 
-	// Rotas de user
+	// Rotas de auth
 	r.POST("/api/v1/register", authHandler.Register)
 	r.POST("/api/v1/login", authHandler.Login)
+
+	// Rotas de user
 	v1.GET("/users/me", userHandler.Me)
 	v1.PUT("/users/me", userHandler.Update)
 	v1.DELETE("/users/me", userHandler.Delete)
