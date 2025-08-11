@@ -33,7 +33,6 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 }
 
 // @BasePath /api/v1
-
 // @Summary Registra um usuário
 // @Description Registra um usuário no sistema
 // @Tags auth
@@ -76,6 +75,18 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	})
 }
 
+// @BasePath /api/v1
+// @Summary Login de usuários
+// @Description Login de usuários no sistema
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body LoginInput true "Request body with email and password"
+// @Success 200 {object} models.MessageResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var input LoginInput
 
