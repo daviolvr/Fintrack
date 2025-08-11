@@ -20,7 +20,19 @@ func NewTransactionHandler(db *sql.DB) *TransactionHandler {
 	return &TransactionHandler{DB: db}
 }
 
-// Criar transaction
+// @BasePath /api/v1
+// @Summary Cria uma transação
+// @Description Cria uma transação para o usuário em questão
+// @Tags transaction
+// @Accept json
+// @Produce json
+// @Param transaction body models.TransactionCreateResponse true "Request body"
+// @Success 201
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /transactions [post]
 func (h *TransactionHandler) Create(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -62,7 +74,18 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, transaction)
 }
 
-// Lista as transações por usuário
+// @BasePath /api/v1
+// @Summary Lista as transações
+// @Description Lista as transações de um usuário
+// @Tags transaction
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.TransactionListResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /transactions [get]
 func (h *TransactionHandler) List(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -112,7 +135,19 @@ func (h *TransactionHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, transactions)
 }
 
-// Atualiza transação do usuário
+// @BasePath /api/v1
+// @Summary Atualiza uma transação
+// @Description Atualiza uma transação do usuário em questão
+// @Tags transaction
+// @Accept json
+// @Produce json
+// @Param transaction body models.TransactionUpdateResponse true "Request body"
+// @Success 200 {object} models.MessageResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /transactions/{id} [put]
 func (h *TransactionHandler) Update(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {
@@ -169,7 +204,20 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	services.RespondMessage(c, "Transação atualizada com sucesso")
 }
 
-// Deleta transação do usuário
+// @BasePath /api/v1
+// @Summary Deleta uma transação
+// @Description Deleta uma transação do usuário em questão
+// @Tags transaction
+// @Accept json
+// @Produce json
+// @Param id path int true "ID da transação"
+// @Success 200 {object} models.MessageResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Router /transactions/{id} [delete]
 func (h *TransactionHandler) Delete(c *gin.Context) {
 	userID, err := services.GetUserID(c)
 	if err != nil {

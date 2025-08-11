@@ -39,3 +39,29 @@ type CategoryListResponse struct {
 	UserID int64 `json:"user_id"`
 	Name   int64 `json:"name"`
 }
+
+type TransactionCreateResponse struct {
+	CategoryID  int64   `json:"category_id"`
+	Type        string  `json:"type"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
+	Date        string  `json:"date"`
+}
+
+type TransactionListResponse struct {
+	CategoryID  int64     `json:"category_id"`
+	Type        string    `json:"type"` // "income" ou "expense"
+	Amount      float64   `json:"amount" db:"amount"`
+	Description string    `json:"description"`
+	Date        time.Time `json:"date"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type TransactionUpdateResponse struct {
+	CategoryID  int64   `json:"category_id"`
+	Type        string  `json:"type"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
+	Date        string  `json:"date"`
+}
