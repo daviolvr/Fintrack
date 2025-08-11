@@ -3,9 +3,12 @@ package router
 import (
 	"database/sql"
 
+	docs "github.com/daviolvr/Fintrack/docs"
 	"github.com/daviolvr/Fintrack/internal/handlers"
 	"github.com/daviolvr/Fintrack/internal/middlewares"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRoutes(r *gin.Engine, db *sql.DB) {
@@ -14,15 +17,17 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	categoryHandler := handlers.NewCategoryHandler(db)
 	transactionHandler := handlers.NewTransactionHandler(db)
 
+	docs.SwaggerInfo.BasePath = "/api/v1"
+
 	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
 
 	// Rotas de user
 	r.POST("/api/v1/register", authHandler.Register)
 	r.POST("/api/v1/login", authHandler.Login)
-	v1.GET("/me", userHandler.Me)
-	v1.PUT("/me", userHandler.Update)
-	v1.DELETE("/me", userHandler.Delete)
-	v1.PUT("/change_password", userHandler.UpdatePassword)
+	v1.GET("/users/me", userHandler.Me)
+	v1.PUT("/users/me", userHandler.Update)
+	v1.DELETE("/users/me", userHandler.Delete)
+	v1.PUT("/users/password", userHandler.UpdatePassword)
 
 	// Rotas de categories
 	v1.POST("/categories", categoryHandler.Create)
@@ -35,4 +40,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	v1.GET("/transactions", transactionHandler.List)
 	v1.PUT("/transactions/:id", transactionHandler.Update)
 	v1.DELETE("/transactions/:id", transactionHandler.Delete)
+
+	// Inicializa Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }

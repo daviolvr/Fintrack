@@ -32,6 +32,18 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 	return &AuthHandler{DB: db}
 }
 
+// @BasePath /api/v1
+
+// @Summary Registra um usuário
+// @Description Registra um usuário no sistema
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body RegisterInput true "Request Body with User data"
+// @Success 201 {object} models.MessageResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var input RegisterInput
 
