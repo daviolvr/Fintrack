@@ -1,4 +1,4 @@
-package services
+package utils
 
 import (
 	"database/sql"
@@ -35,7 +35,7 @@ func GetIDParam(c *gin.Context, name string) (int64, error) {
 }
 
 // Faz bind do JSON e retorna false se inválido
-func BindJSON(c *gin.Context, obj interface{}) bool {
+func BindJSON(c *gin.Context, obj any) bool {
 	if err := c.ShouldBindJSON(obj); err != nil {
 		RespondError(c, http.StatusBadRequest, "Dados inválidos")
 		return false

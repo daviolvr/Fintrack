@@ -7,6 +7,7 @@ import (
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/services"
+	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,15 +31,15 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 // @Security BearerAuth
 // @Router /users/me [get]
 func (h *UserHandler) Me(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
 		return
 	}
 
@@ -63,9 +64,9 @@ func (h *UserHandler) Me(c *gin.Context) {
 // @Security BearerAuth
 // @Router /users/me [put]
 func (h *UserHandler) Update(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -74,7 +75,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		LastName  string `json:"last_name"`
 		Email     string `json:"email"`
 	}
-	if !services.BindJSON(c, &input) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
@@ -86,11 +87,11 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	if err := repository.UpdateUser(h.DB, &user); err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar usuário")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar usuário")
 		return
 	}
 
-	services.RespondMessage(c, "Usuário atualizado com sucesso")
+	utils.RespondMessage(c, "Usuário atualizado com sucesso")
 }
 
 // @BasePath /api/v1
@@ -105,14 +106,14 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Security BearerAuth
 // @Router /users/me [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	if err := repository.DeleteUser(h.DB, userID); err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao deletar usuário")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar usuário")
 		return
 	}
 
@@ -130,9 +131,9 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Security BearerAuth
 // @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -140,24 +141,24 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		Password    string `json:"password"`
 		NewPassword string `json:"new_password"`
 	}
-	if !services.BindJSON(c, &input) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
 	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, "Usuário não identificado")
+		utils.RespondError(c, http.StatusUnauthorized, "Usuário não identificado")
 		return
 	}
 
 	if !services.CheckPasswordHash(input.Password, user.Password) {
-		services.RespondError(c, http.StatusUnauthorized, "Senha incorreta")
+		utils.RespondError(c, http.StatusUnauthorized, "Senha incorreta")
 		return
 	}
 
 	hashedPassword, err := services.HashPassword(input.NewPassword)
 	if err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao hashear senha")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao hashear senha")
 		return
 	}
 
@@ -167,9 +168,9 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	}
 
 	if err := repository.UpdatePassword(h.DB, &updatedUser); err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar senha do usuário")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar senha do usuário")
 		return
 	}
 
-	services.RespondMessage(c, "Usuário atualizado com sucesso")
+	utils.RespondMessage(c, "Usuário atualizado com sucesso")
 }

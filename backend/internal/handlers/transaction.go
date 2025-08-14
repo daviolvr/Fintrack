@@ -8,7 +8,7 @@ import (
 
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
-	"github.com/daviolvr/Fintrack/internal/services"
+	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,9 +34,9 @@ func NewTransactionHandler(db *sql.DB) *TransactionHandler {
 // @Security BearerAuth
 // @Router /transactions [post]
 func (h *TransactionHandler) Create(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -47,13 +47,13 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 		Description string  `json:"description"`
 		Date        string  `json:"date" binding:"required,datetime=2006-01-02"`
 	}
-	if !services.BindJSON(c, &input) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
 	parsedDate, err := time.Parse("2006-01-02", input.Date)
 	if err != nil {
-		services.RespondError(c, http.StatusBadRequest, "Data inválida")
+		utils.RespondError(c, http.StatusBadRequest, "Data inválida")
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	}
 
 	if err := repository.CreateTransaction(h.DB, &transaction); err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao criar transação")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao criar transação")
 		return
 	}
 
@@ -87,9 +87,9 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 // @Security BearerAuth
 // @Router /transactions [get]
 func (h *TransactionHandler) List(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -99,7 +99,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		if parsed, err := time.Parse("2006-01-02", from); err == nil {
 			fromDatePtr = &parsed
 		} else {
-			services.RespondError(c, http.StatusBadRequest, "Formato de from_date inválido")
+			utils.RespondError(c, http.StatusBadRequest, "Formato de from_date inválido")
 			return
 		}
 	}
@@ -109,7 +109,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		if parsed, err := time.Parse("2006-01-02", to); err == nil {
 			toDatePtr = &parsed
 		} else {
-			services.RespondError(c, http.StatusBadRequest, "Formato de to_date inválido")
+			utils.RespondError(c, http.StatusBadRequest, "Formato de to_date inválido")
 			return
 		}
 	}
@@ -119,7 +119,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		if parsed, err := strconv.ParseInt(cat, 10, 64); err == nil {
 			categoryIDPtr = &parsed
 		} else {
-			services.RespondError(c, http.StatusBadRequest, "category_id inválido")
+			utils.RespondError(c, http.StatusBadRequest, "category_id inválido")
 			return
 		}
 	}
@@ -127,7 +127,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 	// Busca no banco
 	transactions, err := repository.FindTransactionsByUser(h.DB, userID, fromDatePtr, toDatePtr, categoryIDPtr)
 	if err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transações")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transações")
 		return
 	}
 
@@ -149,16 +149,16 @@ func (h *TransactionHandler) List(c *gin.Context) {
 // @Security BearerAuth
 // @Router /transactions/{id} [put]
 func (h *TransactionHandler) Update(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	// ID da transação
-	transactionID, err := services.GetIDParam(c, "id")
+	transactionID, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		services.RespondError(c, http.StatusBadRequest, "ID inválido")
+		utils.RespondError(c, http.StatusBadRequest, "ID inválido")
 		return
 	}
 
@@ -169,14 +169,14 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 		Description string  `json:"description"`
 		Date        string  `json:"date" binding:"required,datetime=2006-01-02"`
 	}
-	if !services.BindJSON(c, &input) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
 	// Converte data
 	parsedDate, err := time.Parse("2006-01-02", input.Date)
 	if err != nil {
-		services.RespondError(c, http.StatusBadRequest, "Data inválida")
+		utils.RespondError(c, http.StatusBadRequest, "Data inválida")
 		return
 	}
 
@@ -193,15 +193,15 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 
 	// Atualiza no banco
 	err = repository.UpdateTransaction(h.DB, &transaction)
-	if services.HandleNotFound(c, err, "Transação não encontrada") {
+	if utils.HandleNotFound(c, err, "Transação não encontrada") {
 		return
 	}
 	if err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar transação")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar transação")
 		return
 	}
 
-	services.RespondMessage(c, "Transação atualizada com sucesso")
+	utils.RespondMessage(c, "Transação atualizada com sucesso")
 }
 
 // @BasePath /api/v1
@@ -219,26 +219,26 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 // @Security BearerAuth
 // @Router /transactions/{id} [delete]
 func (h *TransactionHandler) Delete(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	transactionID, err := services.GetIDParam(c, "id")
+	transactionID, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		services.RespondError(c, http.StatusBadRequest, "ID da transação inválido")
+		utils.RespondError(c, http.StatusBadRequest, "ID da transação inválido")
 		return
 	}
 
 	err = repository.DeleteTransactionByUser(h.DB, userID, transactionID)
 	if err != nil {
-		if services.HandleNotFound(c, err, "Transação não encontrada") {
+		if utils.HandleNotFound(c, err, "Transação não encontrada") {
 			return
 		}
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao deletar transação")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar transação")
 		return
 	}
 
-	services.RespondMessage(c, "Transação deletada com sucesso")
+	utils.RespondMessage(c, "Transação deletada com sucesso")
 }

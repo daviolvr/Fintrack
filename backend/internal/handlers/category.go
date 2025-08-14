@@ -6,7 +6,7 @@ import (
 
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
-	"github.com/daviolvr/Fintrack/internal/services"
+	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,16 +31,16 @@ func NewCategoryHandler(db *sql.DB) *CategoryHandler {
 // @Security BearerAuth
 // @Router /categories [post]
 func (h *CategoryHandler) Create(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	var input struct {
 		Name string `json:"name" binding:"required,min=2"`
 	}
-	if !services.BindJSON(c, &input) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	}
 
 	if err := repository.CreateCategory(h.DB, &category); err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao criar categoria")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao criar categoria")
 		return
 	}
 
@@ -69,15 +69,15 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 // @Security BearerAuth
 // @Router /categories [get]
 func (h *CategoryHandler) List(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	categories, err := repository.FindCategoriesByUser(h.DB, userID)
 	if err != nil {
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao listar categorias")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao listar categorias")
 		return
 	}
 
@@ -98,22 +98,22 @@ func (h *CategoryHandler) List(c *gin.Context) {
 // @Security BearerAuth
 // @Router /categories/{id} [put]
 func (h *CategoryHandler) Update(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	id, err := services.GetIDParam(c, "id")
+	id, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		services.RespondError(c, http.StatusBadRequest, "ID inválido")
+		utils.RespondError(c, http.StatusBadRequest, "ID inválido")
 		return
 	}
 
 	var input struct {
 		Name string `json:"name" binding:"required,min=2"`
 	}
-	if !services.BindJSON(c, &input) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
@@ -124,14 +124,14 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 	}
 
 	if err := repository.UpdateCategory(h.DB, &category); err != nil {
-		if services.HandleNotFound(c, err, "Categoria não encontrada") {
+		if utils.HandleNotFound(c, err, "Categoria não encontrada") {
 			return
 		}
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar categoria")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar categoria")
 		return
 	}
 
-	services.RespondMessage(c, "Categoria atualizada com sucesso")
+	utils.RespondMessage(c, "Categoria atualizada com sucesso")
 }
 
 // @BasePath /api/v1
@@ -149,23 +149,23 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 // @Security BearerAuth
 // @Router /categories/{id} [delete]
 func (h *CategoryHandler) Delete(c *gin.Context) {
-	userID, err := services.GetUserID(c)
+	userID, err := utils.GetUserID(c)
 	if err != nil {
-		services.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	id, err := services.GetIDParam(c, "id")
+	id, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		services.RespondError(c, http.StatusBadRequest, "ID inválido")
+		utils.RespondError(c, http.StatusBadRequest, "ID inválido")
 		return
 	}
 
 	if err := repository.DeleteCategory(h.DB, id, userID); err != nil {
-		if services.HandleNotFound(c, err, "Categoria não encontrada") {
+		if utils.HandleNotFound(c, err, "Categoria não encontrada") {
 			return
 		}
-		services.RespondError(c, http.StatusInternalServerError, "Erro ao deletar categoria")
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar categoria")
 		return
 	}
 
