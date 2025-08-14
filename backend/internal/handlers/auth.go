@@ -3,11 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"os"
 
 	"github.com/daviolvr/Fintrack/internal/auth"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/services"
+	"github.com/daviolvr/Fintrack/internal/utils"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
 )
@@ -107,15 +110,72 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Gera token
-	token, err := auth.GenerateJWT(user.ID)
+	// Gera access token
+	accessToken, err := auth.GenerateJWT(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar token"})
 		return
 	}
 
+	// Gera refresh token
+	refreshToken, err := auth.GenerateRefreshToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar refresh token"})
+		return
+	}
+
 	// Retorna token
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
+}
+
+func RefreshToken(c *gin.Context) {
+	var body struct {
+		RefreshToken string `json:"refresh_token" binding:"required"`
+	}
+
+	// Faz o bind do JSON
+	if !utils.BindJSON(c, &body) {
+		return
+	}
+
+	// Pega a chave do refresh token
+	jwtRefreshSecret := []byte(os.Getenv("JWT_REFRESH_SECRET"))
+
+	// Valida o refresh token
+	token, err := jwt.Parse(body.RefreshToken, func(token *jwt.Token) (any, error) {
+		return jwtRefreshSecret, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+
+	if err != nil || !token.Valid {
+		utils.RespondError(c, http.StatusUnauthorized, "Refresh token inválido")
+		return
+	}
+
+	// Extrai claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.RespondError(c, http.StatusUnauthorized, "Refresh token inválido")
+		return
+	}
+
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		utils.RespondError(c, http.StatusUnauthorized, "Refresh token malformado")
+		return
+	}
+
+	// Gera novo access token
+	newToken, err := auth.GenerateJWT(int64(userIDFloat))
+	if err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, "Erro ao gerar token")
+		return
+	}
+
+	// Retorna o novo access token
+	c.JSON(http.StatusOK, gin.H{
+		"access_token": newToken,
 	})
 }

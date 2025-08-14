@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -23,13 +22,10 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		// Valida o token
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Valida o algoritmo
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("método de assinatura inválido")
-			}
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+			jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+			return jwtSecret, nil
+		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 		if err != nil || !token.Valid {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token inválido"})
@@ -51,7 +47,6 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Injeta user_id no contexto
 		c.Set("user_id", int64(userIDFloat))
-
 		c.Next()
 	}
 }
