@@ -31,47 +31,57 @@ func FindTransactionsByUser(
 	userID int64,
 	fromDate, toDate *time.Time,
 	categoryID *int64,
-) ([]models.Transaction, error) {
-
-	query := `SELECT id, user_id, category_id, type, amount, description, date, created_at, updated_at
-	FROM transactions
-	WHERE user_id = $1`
+	page, limit int,
+) ([]models.Transaction, int, error) {
 
 	args := []any{userID}
-	argIndex := 2 // $1 já está ocupado pelo user_id
+	argIndex := 2
 
-	// Filtro por data inicial
+	query := `
+		SELECT id, user_id, category_id, type, amount, description, date, created_at, updated_at
+		FROM transactions
+		WHERE user_id = $1
+	`
+
 	if fromDate != nil {
 		query += ` AND date >= $` + strconv.Itoa(argIndex)
 		args = append(args, *fromDate)
 		argIndex++
 	}
 
-	// Filtro por data final
 	if toDate != nil {
 		query += ` AND date <= $` + strconv.Itoa(argIndex)
 		args = append(args, *toDate)
 		argIndex++
 	}
 
-	// Filtro por categoria
 	if categoryID != nil {
 		query += ` AND category_id = $` + strconv.Itoa(argIndex)
 		args = append(args, *categoryID)
 		argIndex++
 	}
 
-	// Ordena mais recentes primeiro
-	query += ` ORDER BY date DESC`
+	// Ordena por mais recentes
+	query += ` ORDER BY date desc`
 
-	// Executa a query
+	// Contagem total
+	var total int
+	countQuery := "SELECT COUNT(*) FROM (" + query + ") AS count_sub"
+	if err := db.QueryRow(countQuery, args...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	// Paginação
+	offset := (page - 1) * limit
+	query += ` LIMIT $` + strconv.Itoa(argIndex) + ` OFFSET $` + strconv.Itoa(argIndex+1)
+	args = append(args, limit, offset)
+
 	rows, err := db.Query(query, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
-	// Monta slices de transações
 	var transactions []models.Transaction
 	for rows.Next() {
 		var t models.Transaction
@@ -86,12 +96,12 @@ func FindTransactionsByUser(
 			&t.CreatedAt,
 			&t.UpdatedAt,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		transactions = append(transactions, t)
 	}
 
-	return transactions, nil
+	return transactions, total, nil
 }
 
 // Atualiza uma transação pertencente a um usuário

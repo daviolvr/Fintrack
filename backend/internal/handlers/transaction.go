@@ -93,21 +93,20 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		return
 	}
 
-	// Lê parâmetros de filtro da query string
-	var fromDatePtr *time.Time
+	// Parâmetros de filtro
+	var fromDatePtr, toDatePtr *time.Time
 	if from := c.Query("from_date"); from != "" {
-		if parsed, err := time.Parse("2006-01-02", from); err == nil {
-			fromDatePtr = &parsed
+		if t, err := time.Parse("2006-01-02", from); err == nil {
+			fromDatePtr = &t
 		} else {
 			utils.RespondError(c, http.StatusBadRequest, "Formato de from_date inválido")
 			return
 		}
 	}
 
-	var toDatePtr *time.Time
 	if to := c.Query("to_date"); to != "" {
-		if parsed, err := time.Parse("2006-01-02", to); err == nil {
-			toDatePtr = &parsed
+		if t, err := time.Parse("2006-01-02", to); err == nil {
+			toDatePtr = &t
 		} else {
 			utils.RespondError(c, http.StatusBadRequest, "Formato de to_date inválido")
 			return
@@ -116,23 +115,44 @@ func (h *TransactionHandler) List(c *gin.Context) {
 
 	var categoryIDPtr *int64
 	if cat := c.Query("category_id"); cat != "" {
-		if parsed, err := strconv.ParseInt(cat, 10, 64); err == nil {
-			categoryIDPtr = &parsed
+		if id, err := strconv.ParseInt(cat, 10, 64); err == nil {
+			categoryIDPtr = &id
 		} else {
 			utils.RespondError(c, http.StatusBadRequest, "category_id inválido")
 			return
 		}
 	}
 
-	// Busca no banco
-	transactions, err := repository.FindTransactionsByUser(h.DB, userID, fromDatePtr, toDatePtr, categoryIDPtr)
+	// Parâmetros de paginação
+	page := 1
+	limit := 10
+	if p := c.Query("page"); p != "" {
+		if val, err := strconv.Atoi(p); err == nil && val > 0 {
+			page = val
+		}
+	}
+
+	if l := c.Query("limit"); l != "" {
+		if val, err := strconv.Atoi(l); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	transactions, total, err := repository.FindTransactionsByUser(
+		h.DB, userID, fromDatePtr, toDatePtr, categoryIDPtr, page, limit,
+	)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transações")
 		return
 	}
 
-	// Retorna JSON
-	c.JSON(http.StatusOK, transactions)
+	c.JSON(http.StatusOK, gin.H{
+		"data":       transactions,
+		"page":       page,
+		"limit":      limit,
+		"total":      total,
+		"totalPages": (total + limit - 1) / limit,
+	})
 }
 
 // @BasePath /api/v1
