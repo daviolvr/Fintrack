@@ -112,6 +112,25 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
+	var input struct {
+		Password string `json:"password"`
+	}
+
+	if !utils.BindJSON(c, &input) {
+		return
+	}
+
+	user, err := repository.FindUserByID(h.DB, userID)
+	if err != nil {
+		utils.RespondError(c, http.StatusUnauthorized, "Usuário não identificado")
+		return
+	}
+
+	if !services.CheckPasswordHash(input.Password, user.Password) {
+		utils.RespondError(c, http.StatusUnauthorized, "Senha incorreta")
+		return
+	}
+
 	if err := repository.DeleteUser(h.DB, userID); err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar usuário")
 		return
