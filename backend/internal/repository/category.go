@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/daviolvr/Fintrack/internal/models"
 )
@@ -13,11 +14,48 @@ func CreateCategory(db *sql.DB, category *models.Category) error {
 }
 
 // Busca categorias do usuário
-func FindCategoriesByUser(db *sql.DB, userID int64) ([]models.Category, error) {
-	query := `SELECT id, user_id, name FROM categories WHERE user_id = $1 ORDER BY name`
-	rows, err := db.Query(query, userID)
+func FindCategoriesByUser(
+	db *sql.DB,
+	userID int64,
+	search string,
+	page, limit int,
+) ([]models.Category, int, error) {
+
+	query := `
+		SELECT id, user_id, name
+		FROM categories
+		WHERE user_id = $1
+	`
+
+	countQuery := `
+		SELECT COUNT(*)
+		FROM categories
+		WHERE user_id = $1
+	`
+
+	// Filtros
+	args := []any{userID}
+	if search != "" {
+		query += ` AND name ILIKE $2`
+		countQuery += ` AND name ILIKE $2`
+		args = append(args, "%"+search+"%")
+	}
+
+	// Contagem total
+	var total int
+	if err := db.QueryRow(countQuery, args...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	// Ordenação + paginação
+	offset := (page - 1) * limit
+	query += ` ORDER by name LIMIT $` + fmt.Sprint(len(args)+1) + ` OFFSET $` + fmt.Sprint(len(args)+2)
+	args = append(args, limit, offset)
+
+	// Execução
+	rows, err := db.Query(query, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -25,12 +63,12 @@ func FindCategoriesByUser(db *sql.DB, userID int64) ([]models.Category, error) {
 	for rows.Next() {
 		var c models.Category
 		if err := rows.Scan(&c.ID, &c.UserID, &c.Name); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		categories = append(categories, c)
 	}
 
-	return categories, nil
+	return categories, total, nil
 }
 
 // Atualiza categoria pelo ID e user_id

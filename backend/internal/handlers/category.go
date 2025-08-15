@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"database/sql"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
@@ -75,13 +77,32 @@ func (h *CategoryHandler) List(c *gin.Context) {
 		return
 	}
 
-	categories, err := repository.FindCategoriesByUser(h.DB, userID)
+	// Query params
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	search := c.Query("search")
+
+	if page < 1 {
+		page = 1
+	}
+
+	if limit < 1 || limit > 100 {
+		limit = 10
+	}
+
+	categories, total, err := repository.FindCategoriesByUser(h.DB, userID, search, page, limit)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Erro ao listar categorias")
 		return
 	}
 
-	c.JSON(http.StatusOK, categories)
+	c.JSON(http.StatusOK, gin.H{
+		"data":       categories,
+		"total":      total,
+		"page":       page,
+		"limit":      limit,
+		"totalPages": int(math.Ceil(float64(total) / float64(limit))),
+	})
 }
 
 // @BasePath /api/v1
