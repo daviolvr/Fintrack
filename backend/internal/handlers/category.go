@@ -28,8 +28,8 @@ func NewCategoryHandler(db *sql.DB) *CategoryHandler {
 // @Produce json
 // @Param name path string true "Nome da categoria"
 // @Success 201
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 501 {object} models.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 501 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /categories [post]
 func (h *CategoryHandler) Create(c *gin.Context) {
@@ -65,9 +65,9 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 // @Tags category
 // @Accept json
 // @Produce json
-// @Success 200 {object} models.CategoryListResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200 {object} utils.CategoryListResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /categories [get]
 func (h *CategoryHandler) List(c *gin.Context) {
@@ -112,10 +112,10 @@ func (h *CategoryHandler) List(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da categoria"
-// @Success 200 {object} models.MessageResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /categories/{id} [put]
 func (h *CategoryHandler) Update(c *gin.Context) {
@@ -163,10 +163,10 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID da categoria"
 // @Success 204
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 404 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /categories/{id} [delete]
 func (h *CategoryHandler) Delete(c *gin.Context) {

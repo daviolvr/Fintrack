@@ -26,7 +26,7 @@ definitions:
     - last_name
     - password
     type: object
-  models.CategoryListResponse:
+  utils.CategoryListResponse:
     properties:
       id:
         type: integer
@@ -35,17 +35,17 @@ definitions:
       user_id:
         type: integer
     type: object
-  models.ErrorResponse:
+  utils.ErrorResponse:
     properties:
       error:
         type: string
     type: object
-  models.MessageResponse:
+  utils.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  models.TransactionCreateResponse:
+  utils.TransactionCreateResponse:
     properties:
       amount:
         type: number
@@ -58,7 +58,7 @@ definitions:
       type:
         type: string
     type: object
-  models.TransactionListResponse:
+  utils.TransactionListResponse:
     properties:
       amount:
         type: number
@@ -76,7 +76,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.TransactionUpdateResponse:
+  utils.TransactionUpdateResponse:
     properties:
       amount:
         type: number
@@ -89,14 +89,14 @@ definitions:
       type:
         type: string
     type: object
-  models.UserChangePassword:
+  utils.UserChangePassword:
     properties:
       new_password:
         type: string
       password:
         type: string
     type: object
-  models.UserResponse:
+  utils.UserResponse:
     properties:
       created_at:
         type: string
@@ -107,7 +107,7 @@ definitions:
       last_name:
         type: string
     type: object
-  models.UserUpdateInput:
+  utils.UserUpdateInput:
     properties:
       email:
         type: string
@@ -130,15 +130,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.CategoryListResponse'
+            $ref: '#/definitions/utils.CategoryListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Lista as categorias
@@ -162,11 +162,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "501":
           description: Not Implemented
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Cria uma categoria
@@ -191,19 +191,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Deleta uma categoria
@@ -225,19 +225,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza uma categoria
@@ -261,20 +261,49 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Login de usuários
+      tags:
+      - auth
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Atualiza token de acesso do usuário
+      parameters:
+      - description: Refresh Token
+        in: path
+        name: refresh_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Atualiza token de acesso
       tags:
       - auth
   /register:
@@ -295,15 +324,15 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Registra um usuário
       tags:
       - auth
@@ -318,19 +347,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.TransactionListResponse'
+            $ref: '#/definitions/utils.TransactionListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Lista as transações
@@ -346,7 +375,7 @@ paths:
         name: transaction
         required: true
         schema:
-          $ref: '#/definitions/models.TransactionCreateResponse'
+          $ref: '#/definitions/utils.TransactionCreateResponse'
       produces:
       - application/json
       responses:
@@ -355,15 +384,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Cria uma transação
@@ -386,23 +415,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Deleta uma transação
@@ -418,26 +447,26 @@ paths:
         name: transaction
         required: true
         schema:
-          $ref: '#/definitions/models.TransactionUpdateResponse'
+          $ref: '#/definitions/utils.TransactionUpdateResponse'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza uma transação
@@ -456,11 +485,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Deleta um usuário
@@ -476,15 +505,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserResponse'
+            $ref: '#/definitions/utils.UserResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Retorna dados do usuário
@@ -500,22 +529,22 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.UserUpdateInput'
+          $ref: '#/definitions/utils.UserUpdateInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza dados do usuário
@@ -530,20 +559,20 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.UserChangePassword'
+          $ref: '#/definitions/utils.UserChangePassword'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MessageResponse'
+            $ref: '#/definitions/utils.MessageResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza a senha do usuário

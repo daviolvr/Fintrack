@@ -26,11 +26,11 @@ func NewTransactionHandler(db *sql.DB) *TransactionHandler {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Param transaction body models.TransactionCreateResponse true "Request body"
+// @Param transaction body utils.TransactionCreateResponse true "Request body"
 // @Success 201
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions [post]
 func (h *TransactionHandler) Create(c *gin.Context) {
@@ -80,10 +80,10 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Success 200 {object} models.TransactionListResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200 {object} utils.TransactionListResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions [get]
 func (h *TransactionHandler) List(c *gin.Context) {
@@ -204,11 +204,11 @@ func (h *TransactionHandler) List(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Param transaction body models.TransactionUpdateResponse true "Request body"
-// @Success 200 {object} models.MessageResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Param transaction body utils.TransactionUpdateResponse true "Request body"
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions/{id} [put]
 func (h *TransactionHandler) Update(c *gin.Context) {
@@ -274,11 +274,11 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da transação"
-// @Success 200 {object} models.MessageResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 404 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions/{id} [delete]
 func (h *TransactionHandler) Delete(c *gin.Context) {

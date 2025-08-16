@@ -8,7 +8,6 @@ import (
 	"github.com/daviolvr/Fintrack/internal/auth"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
-	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 
@@ -42,9 +41,9 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 // @Accept json
 // @Produce json
 // @Param user body RegisterInput true "Request Body with User data"
-// @Success 201 {object} models.MessageResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 201 {object} utils.MessageResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var input RegisterInput
@@ -55,7 +54,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Hasheia a senha
-	hashedPassword, err := services.HashPassword(input.Password)
+	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao hashear a senha"})
 		return
@@ -85,10 +84,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body LoginInput true "Request body"
-// @Success 200 {object} models.MessageResponse
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200 {object} utils.MessageResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var input LoginInput
@@ -105,7 +104,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Verifica a senha
-	if !services.CheckPasswordHash(input.Password, user.Password) {
+	if !utils.CheckPasswordHash(input.Password, user.Password) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email ou senha incorretos"})
 		return
 	}
@@ -131,6 +130,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
+// @BasePath /api/v1
+// @Summary Atualiza token de acesso
+// @Description Atualiza token de acesso do usuário
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param refresh_token path string true "Refresh Token"
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /refresh [post]
 func RefreshToken(c *gin.Context) {
 	var body struct {
 		RefreshToken string `json:"refresh_token" binding:"required"`

@@ -6,7 +6,6 @@ import (
 
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
-	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -25,9 +24,9 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Success 200 {object} models.UserResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Success 200 {object} utils.UserResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me [get]
 func (h *UserHandler) Me(c *gin.Context) {
@@ -57,10 +56,10 @@ func (h *UserHandler) Me(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user body models.UserUpdateInput true "Request body"
-// @Success 200 {object} models.MessageResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Param user body utils.UserUpdateInput true "Request body"
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me [put]
 func (h *UserHandler) Update(c *gin.Context) {
@@ -101,8 +100,8 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 204
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
@@ -126,7 +125,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if !services.CheckPasswordHash(input.Password, user.Password) {
+	if !utils.CheckPasswordHash(input.Password, user.Password) {
 		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
@@ -143,10 +142,10 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Summary Atualiza a senha do usuário
 // @Description Atualiza a senha do usuário em questão
 // @Tags user
-// @Param user body models.UserChangePassword true "Request body"
-// @Success 200 {object} models.MessageResponse
-// @Failure 401 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Param user body utils.UserChangePassword true "Request body"
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
@@ -170,12 +169,12 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	if !services.CheckPasswordHash(input.Password, user.Password) {
+	if !utils.CheckPasswordHash(input.Password, user.Password) {
 		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
-	hashedPassword, err := services.HashPassword(input.NewPassword)
+	hashedPassword, err := utils.HashPassword(input.NewPassword)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
