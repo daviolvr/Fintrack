@@ -93,7 +93,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		return
 	}
 
-	// Parâmetros de filtro
+	// Filtros de data
 	var fromDatePtr, toDatePtr *time.Time
 	if from := c.Query("from_date"); from != "" {
 		if t, err := time.Parse("2006-01-02", from); err == nil {
@@ -113,12 +113,35 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		}
 	}
 
+	// Filtro por categoria
 	var categoryIDPtr *int64
 	if cat := c.Query("category_id"); cat != "" {
 		if id, err := strconv.ParseInt(cat, 10, 64); err == nil {
 			categoryIDPtr = &id
 		} else {
 			utils.RespondError(c, http.StatusBadRequest, "category_id inválido")
+			return
+		}
+	}
+
+	// Filtro por valor mínimo
+	var minAmountPtr *float64
+	if min := c.Query("min_amount"); min != "" {
+		if val, err := strconv.ParseFloat(min, 64); err == nil {
+			minAmountPtr = &val
+		} else {
+			utils.RespondError(c, http.StatusBadRequest, "min_amount inválido")
+			return
+		}
+	}
+
+	// Filtro por valor máximo
+	var maxAmountPtr *float64
+	if max := c.Query("max_amount"); max != "" {
+		if val, err := strconv.ParseFloat(max, 64); err == nil {
+			maxAmountPtr = &val
+		} else {
+			utils.RespondError(c, http.StatusBadRequest, "max_mount inválido")
 			return
 		}
 	}
@@ -139,7 +162,15 @@ func (h *TransactionHandler) List(c *gin.Context) {
 	}
 
 	transactions, total, err := repository.FindTransactionsByUser(
-		h.DB, userID, fromDatePtr, toDatePtr, categoryIDPtr, page, limit,
+		h.DB,
+		userID,
+		fromDatePtr,
+		toDatePtr,
+		categoryIDPtr,
+		minAmountPtr,
+		maxAmountPtr,
+		page,
+		limit,
 	)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transações")
