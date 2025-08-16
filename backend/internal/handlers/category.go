@@ -35,7 +35,7 @@ func NewCategoryHandler(db *sql.DB) *CategoryHandler {
 func (h *CategoryHandler) Create(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	}
 
 	if err := repository.CreateCategory(h.DB, &category); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao criar categoria")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 func (h *CategoryHandler) List(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *CategoryHandler) List(c *gin.Context) {
 
 	categories, total, err := repository.FindCategoriesByUser(h.DB, userID, search, page, limit)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao listar categorias")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -121,13 +121,13 @@ func (h *CategoryHandler) List(c *gin.Context) {
 func (h *CategoryHandler) Update(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
 	id, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "ID inválido")
+		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
@@ -145,10 +145,10 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 	}
 
 	if err := repository.UpdateCategory(h.DB, &category); err != nil {
-		if utils.HandleNotFound(c, err, "Categoria não encontrada") {
+		if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
 			return
 		}
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar categoria")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInvalidID.Error())
 		return
 	}
 
@@ -172,21 +172,21 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 func (h *CategoryHandler) Delete(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
 	id, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "ID inválido")
+		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
 	if err := repository.DeleteCategory(h.DB, id, userID); err != nil {
-		if utils.HandleNotFound(c, err, "Categoria não encontrada") {
+		if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
 			return
 		}
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar categoria")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 

@@ -36,7 +36,7 @@ func NewTransactionHandler(db *sql.DB) *TransactionHandler {
 func (h *TransactionHandler) Create(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	}
 
 	if err := repository.CreateTransaction(h.DB, &transaction); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao criar transação")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -89,7 +89,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 func (h *TransactionHandler) List(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -185,7 +185,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		limit,
 	)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transações")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -221,7 +221,7 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	// ID da transação
 	transactionID, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "ID inválido")
+		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
@@ -256,11 +256,11 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 
 	// Atualiza no banco
 	err = repository.UpdateTransaction(h.DB, &transaction)
-	if utils.HandleNotFound(c, err, "Transação não encontrada") {
+	if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
 		return
 	}
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar transação")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -290,16 +290,16 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 
 	transactionID, err := utils.GetIDParam(c, "id")
 	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "ID da transação inválido")
+		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
 	err = repository.DeleteTransactionByUser(h.DB, userID, transactionID)
 	if err != nil {
-		if utils.HandleNotFound(c, err, "Transação não encontrada") {
+		if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
 			return
 		}
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar transação")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 

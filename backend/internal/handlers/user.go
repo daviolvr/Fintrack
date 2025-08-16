@@ -39,7 +39,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 
 	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -66,7 +66,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 func (h *UserHandler) Update(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -87,7 +87,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	if err := repository.UpdateUser(h.DB, &user); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar usuário")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -108,7 +108,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 func (h *UserHandler) Delete(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -122,17 +122,17 @@ func (h *UserHandler) Delete(c *gin.Context) {
 
 	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, "Usuário não identificado")
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
 	if !services.CheckPasswordHash(input.Password, user.Password) {
-		utils.RespondError(c, http.StatusUnauthorized, "Senha incorreta")
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
 	if err := repository.DeleteUser(h.DB, userID); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao deletar usuário")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -152,7 +152,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
@@ -166,18 +166,18 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 
 	user, err := repository.FindUserByID(h.DB, userID)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, "Usuário não identificado")
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
 	if !services.CheckPasswordHash(input.Password, user.Password) {
-		utils.RespondError(c, http.StatusUnauthorized, "Senha incorreta")
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
 	hashedPassword, err := services.HashPassword(input.NewPassword)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao hashear senha")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
@@ -187,7 +187,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	}
 
 	if err := repository.UpdatePassword(h.DB, &updatedUser); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar senha do usuário")
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 

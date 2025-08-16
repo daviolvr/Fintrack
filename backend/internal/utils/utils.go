@@ -9,6 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	ErrUnauthorized   = errors.New("não autorizado")
+	ErrInvalidID      = errors.New("ID inválido")
+	ErrNotFound       = errors.New("registro não encontrado")
+	ErrInternalServer = errors.New("erro interno do servidor")
+)
+
 // Pega o ID do usuário e retorna
 func GetUserID(c *gin.Context) (int64, error) {
 	userIDValue, exists := c.Get("user_id")
