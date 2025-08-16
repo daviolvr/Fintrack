@@ -146,6 +146,17 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		}
 	}
 
+	// Filtro por tipo de transação (income ou expense)
+	var typePtr *string
+	if t := c.Query("type"); t != "" {
+		if t == "income" || t == "expense" {
+			typePtr = &t
+		} else {
+			utils.RespondError(c, http.StatusBadRequest, "type deve ser 'income' ou 'expense'")
+			return
+		}
+	}
+
 	// Parâmetros de paginação
 	page := 1
 	limit := 10
@@ -169,6 +180,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		categoryIDPtr,
 		minAmountPtr,
 		maxAmountPtr,
+		typePtr,
 		page,
 		limit,
 	)

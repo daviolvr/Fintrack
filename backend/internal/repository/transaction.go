@@ -32,6 +32,7 @@ func FindTransactionsByUser(
 	fromDate, toDate *time.Time,
 	categoryID *int64,
 	minAmount, maxAmount *float64,
+	txType *string,
 	page, limit int,
 ) ([]models.Transaction, int, error) {
 
@@ -71,6 +72,12 @@ func FindTransactionsByUser(
 	if maxAmount != nil {
 		query += " AND amount <= $" + strconv.Itoa(argIndex)
 		args = append(args, *maxAmount)
+		argIndex++
+	}
+
+	if txType != nil {
+		query += " AND type = $" + strconv.Itoa(argIndex)
+		args = append(args, *txType)
 		argIndex++
 	}
 
