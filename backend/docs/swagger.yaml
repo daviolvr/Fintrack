@@ -26,6 +26,11 @@ definitions:
     - last_name
     - password
     type: object
+  utils.BalanceUpdateInput:
+    properties:
+      balance:
+        type: number
+    type: object
   utils.CategoryListResponse:
     properties:
       id:
@@ -98,6 +103,8 @@ definitions:
     type: object
   utils.UserResponse:
     properties:
+      balance:
+        type: string
       created_at:
         type: string
       email:
@@ -548,6 +555,38 @@ paths:
       security:
       - BearerAuth: []
       summary: Atualiza dados do usuário
+      tags:
+      - user
+  /users/me/balance:
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza o saldo do usuário em questão
+      parameters:
+      - description: Novo saldo
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/utils.BalanceUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualiza o saldo de um usuário
       tags:
       - user
   /users/password:

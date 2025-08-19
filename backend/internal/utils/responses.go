@@ -66,3 +66,7 @@ type TransactionUpdateResponse struct {
 	Description string  `json:"description"`
 	Date        string  `json:"date"`
 }
+
+type BalanceUpdateInput struct {
+	Balance float64 `json:"balance"`
+}

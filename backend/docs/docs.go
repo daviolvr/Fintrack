@@ -690,6 +690,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/me/balance": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Atualiza o saldo do usuário em questão",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Atualiza o saldo de um usuário",
+                "parameters": [
+                    {
+                        "description": "Novo saldo",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/utils.BalanceUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.MessageResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/password": {
             "put": {
                 "security": [
@@ -773,6 +824,14 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6
+                }
+            }
+        },
+        "utils.BalanceUpdateInput": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
                 }
             }
         },
@@ -887,6 +946,9 @@ const docTemplate = `{
         "utils.UserResponse": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },

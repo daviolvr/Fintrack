@@ -94,6 +94,18 @@ func (h *UserHandler) Update(c *gin.Context) {
 	utils.RespondMessage(c, "Usuário atualizado com sucesso")
 }
 
+// @BasePath /api/v1
+// @Summary Atualiza o saldo de um usuário
+// @Description Atualiza o saldo do usuário em questão
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param data body utils.BalanceUpdateInput true "Novo saldo"
+// @Success 200 {object} utils.MessageResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Security BearerAuth
+// @Router /users/me/balance [patch]
 func (h *UserHandler) UpdateBalance(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -118,7 +130,7 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 		return
 	}
 
-	utils.RespondMessage(c, "Usuário atualizado com sucesso")
+	utils.RespondMessage(c, "Saldo atualizado com sucesso")
 }
 
 // @BasePath /api/v1
