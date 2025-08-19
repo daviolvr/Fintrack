@@ -101,6 +101,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	user, err := repository.FindUserByEmail(h.DB, input.Email)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email ou senha incorretos"})
+		return
 	}
 
 	// Verifica a senha

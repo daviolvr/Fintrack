@@ -26,6 +26,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// Rotas de user
 	v1.GET("/users/me", userHandler.Me)
 	v1.PUT("/users/me", userHandler.Update)
+	v1.PATCH("/users/me/balance", userHandler.UpdateBalance)
 	v1.DELETE("/users/me", userHandler.Delete)
 	v1.PUT("/users/password", userHandler.UpdatePassword)
 

@@ -46,6 +46,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 		"first_name": user.FirstName,
 		"last_name":  user.LastName,
 		"email":      user.Email,
+		"balance":    user.Balance,
 		"created_at": user.CreatedAt,
 	})
 }
@@ -86,6 +87,33 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	if err := repository.UpdateUser(h.DB, &user); err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		return
+	}
+
+	utils.RespondMessage(c, "Usuário atualizado com sucesso")
+}
+
+func (h *UserHandler) UpdateBalance(c *gin.Context) {
+	userID, err := utils.GetUserID(c)
+	if err != nil {
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
+		return
+	}
+
+	var input struct {
+		Balance float64 `json:"balance"`
+	}
+	if !utils.BindJSON(c, &input) {
+		return
+	}
+
+	user := models.User{
+		ID:      userID,
+		Balance: input.Balance,
+	}
+
+	if err := repository.UpdateUserBalance(h.DB, &user); err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}

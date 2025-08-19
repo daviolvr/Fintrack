@@ -10,6 +10,7 @@ type User struct {
 	LastName  string    `json:"last_name" db:"last_name"`
 	Email     string    `json:"email" db:"email"`
 	Password  string    `json:"-" db:"password_hash"`
+	Balance   float64   `json:"balance" db:"balance"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

@@ -41,7 +41,7 @@ func FindUserByEmail(db *sql.DB, email string) (*models.User, error) {
 
 // Busca usuário pelo ID
 func FindUserByID(db *sql.DB, id int64) (*models.User, error) {
-	query := `SELECT id, first_name, last_name, email, password_hash, created_at, updated_at
+	query := `SELECT id, first_name, last_name, email, password_hash, balance, created_at, updated_at
 	FROM users WHERE id = $1`
 
 	row := db.QueryRow(query, id)
@@ -53,6 +53,7 @@ func FindUserByID(db *sql.DB, id int64) (*models.User, error) {
 		&user.LastName,
 		&user.Email,
 		&user.Password,
+		&user.Balance,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -68,6 +69,17 @@ func UpdateUser(db *sql.DB, user *models.User) error {
 	query := `UPDATE users SET first_name = $1, last_name = $2, email = $3, updated_at = NOW()
 	WHERE id = $4`
 	_, err := db.Exec(query, user.FirstName, user.LastName, user.Email, user.ID)
+	return err
+}
+
+// Atualiza o saldo da conta do usuário
+func UpdateUserBalance(db *sql.DB, user *models.User) error {
+	query := `
+		UPDATE users SET balance = $1
+		WHERE id = $2
+	`
+
+	_, err := db.Exec(query, user.Balance, user.ID)
 	return err
 }
 
