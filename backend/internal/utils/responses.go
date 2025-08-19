@@ -49,7 +49,7 @@ type TransactionCreateResponse struct {
 	Date        string  `json:"date"`
 }
 
-type TransactionListResponse struct {
+type TransactionGetResponse struct {
 	CategoryID  int64     `json:"category_id"`
 	Type        string    `json:"type"` // "income" ou "expense"
 	Amount      float64   `json:"amount" db:"amount"`

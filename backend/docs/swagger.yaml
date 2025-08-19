@@ -26,6 +26,28 @@ definitions:
     - last_name
     - password
     type: object
+  models.Transaction:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      created_at:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      type:
+        description: '"income" ou "expense"'
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   utils.BalanceUpdateInput:
     properties:
       balance:
@@ -63,7 +85,7 @@ definitions:
       type:
         type: string
     type: object
-  utils.TransactionListResponse:
+  utils.TransactionGetResponse:
     properties:
       amount:
         type: number
@@ -354,7 +376,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.TransactionListResponse'
+            $ref: '#/definitions/utils.TransactionGetResponse'
         "400":
           description: Bad Request
           schema:
@@ -442,6 +464,40 @@ paths:
       security:
       - BearerAuth: []
       summary: Deleta uma transação
+      tags:
+      - transaction
+    get:
+      consumes:
+      - application/json
+      description: Retorna uma transação do usuário em questão
+      parameters:
+      - description: ID da transação
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Retorna uma transação
       tags:
       - transaction
     put:

@@ -94,6 +94,19 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, transaction)
 }
 
+// @BasePath /api/v1
+// @Summary Retorna uma transação
+// @Description Retorna uma transação do usuário em questão
+// @Tags transaction
+// @Accept json
+// @Produce json
+// @Param id path int true "ID da transação"
+// @Success 200 {object} models.Transaction
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Security BearerAuth
+// @Router /transactions/{id} [get]
 func (h *TransactionHandler) Retrieve(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -127,7 +140,7 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.TransactionListResponse
+// @Success 200 {object} utils.TransactionGetResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
