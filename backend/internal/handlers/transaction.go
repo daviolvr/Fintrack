@@ -94,6 +94,33 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, transaction)
 }
 
+func (h *TransactionHandler) Retrieve(c *gin.Context) {
+	userID, err := utils.GetUserID(c)
+	if err != nil {
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
+		return
+	}
+
+	transactionID, err := utils.GetIDParam(c, "id")
+	if err != nil {
+		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
+		return
+	}
+
+	transaction, err := repository.RetrieveTransactionByIDAndUserID(h.DB, userID, transactionID)
+	if err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		return
+	}
+
+	if transaction == nil {
+		utils.RespondError(c, http.StatusNotFound, "Transação não encontrada")
+		return
+	}
+
+	c.JSON(http.StatusOK, transaction)
+}
+
 // @BasePath /api/v1
 // @Summary Lista as transações
 // @Description Lista as transações de um usuário
@@ -313,6 +340,14 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
+
+	// user, err := repository.FindUserByID(h.DB, userID)
+	// if err != nil {
+	// 	utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
+	// 	return
+	// }
+
+	// transaction := fin
 
 	err = repository.DeleteTransactionByUser(h.DB, userID, transactionID)
 	if err != nil {

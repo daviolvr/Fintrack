@@ -25,6 +25,41 @@ func CreateTransaction(db *sql.DB, t *models.Transaction) error {
 	).Scan(&t.ID)
 }
 
+// Busca uma única transação do usuário
+func RetrieveTransactionByIDAndUserID(
+	db *sql.DB,
+	userID, transactionID int64,
+) (*models.Transaction, error) {
+	query := `
+		SELECT id, user_id, category_id, type, amount, description, date, created_at, updated_at
+		FROM transactions
+		WHERE id = $1 AND user_id = $2
+	`
+
+	row := db.QueryRow(query, transactionID, userID)
+
+	var transaction models.Transaction
+	err := row.Scan(
+		&transaction.ID,
+		&transaction.UserID,
+		&transaction.CategoryID,
+		&transaction.Type,
+		&transaction.Amount,
+		&transaction.Description,
+		&transaction.Date,
+		&transaction.CreatedAt,
+		&transaction.UpdatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &transaction, nil
+}
+
 // Busca transação com filtros opcionais
 func FindTransactionsByUser(
 	db *sql.DB,
