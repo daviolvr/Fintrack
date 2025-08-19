@@ -88,12 +88,3 @@ func CalculateBalanceAfterTransaction(
 
 	return 0, errors.New("tipo de transação inválida")
 }
-
-// Calcula saldo do usuário após ele deletar uma transação
-// func CalculateBalanceAfterDeleteTransaction(
-// 	c *gin.Context,
-// 	amount, balance float64,
-// ) (float64, error) {
-// 	afterBalance := balance + amount
-
-// }

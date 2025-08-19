@@ -9,7 +9,10 @@ import (
 
 // Cria categoria para o usuário
 func CreateCategory(db *sql.DB, category *models.Category) error {
-	query := `INSERT into categories (user_id, name) VALUES ($1, $2) RETURNING id`
+	query := `
+		INSERT into categories (user_id, name) VALUES ($1, $2) 
+		RETURNING id
+	`
 	return db.QueryRow(query, category.UserID, category.Name).Scan(&category.ID)
 }
 
@@ -73,7 +76,10 @@ func FindCategoriesByUser(
 
 // Atualiza categoria pelo ID e user_id
 func UpdateCategory(db *sql.DB, category *models.Category) error {
-	query := `UPDATE categories SET name = $1 WHERE id = $2 AND user_id = $3`
+	query := `
+		UPDATE categories SET name = $1 
+		WHERE id = $2 AND user_id = $3
+	`
 	result, err := db.Exec(query, category.Name, category.ID, category.UserID)
 	if err != nil {
 		return err
@@ -91,8 +97,11 @@ func UpdateCategory(db *sql.DB, category *models.Category) error {
 }
 
 // Deleta categoria pelo ID e user_id
-func DeleteCategory(db *sql.DB, id int64, userID int64) error {
-	query := `DELETE FROM categories WHERE id = $1 AND user_id = $2`
+func DeleteCategory(db *sql.DB, id, userID int64) error {
+	query := `
+		DELETE FROM categories 
+		WHERE id = $1 AND user_id = $2
+	`
 	result, err := db.Exec(query, id, userID)
 	if err != nil {
 		return err

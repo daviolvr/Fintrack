@@ -10,9 +10,11 @@ import (
 
 // Cria transação
 func CreateTransaction(db *sql.DB, t *models.Transaction) error {
-	query := `INSERT INTO transactions (user_id, category_id, type, amount, description, date, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-	RETURNING id`
+	query := `
+		INSERT INTO transactions (user_id, category_id, type, amount, description, date, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+		RETURNING id
+	`
 
 	return db.QueryRow(
 		query,
@@ -162,14 +164,14 @@ func FindTransactionsByUser(
 // Atualiza uma transação pertencente a um usuário
 func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
 	query := `
-	UPDATE transactions
-	SET category_id = $1,
+		UPDATE transactions
+		SET category_id = $1,
 		type = $2,
 		amount = $3,
 		description = $4,
 		date = $5,
 		updated_at = NOW()
-	WHERE id = $6 AND user_id = $7
+		WHERE id = $6 AND user_id = $7
 	`
 
 	result, err := db.Exec(query,
@@ -199,8 +201,8 @@ func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
 // Deleta uma transação pelo ID e pelo userID
 func DeleteTransactionByUser(db *sql.DB, userID int64, transactionID int64) error {
 	query := `
-	DELETE FROM transactions
-	WHERE id = $1 AND user_id = $2
+		DELETE FROM transactions
+		WHERE id = $1 AND user_id = $2
 	`
 
 	result, err := db.Exec(query, transactionID, userID)
