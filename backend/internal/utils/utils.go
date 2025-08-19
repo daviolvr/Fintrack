@@ -63,3 +63,28 @@ func HandleNotFound(c *gin.Context, err error, msg string) bool {
 func RespondMessage(c *gin.Context, msg string) {
 	c.JSON(http.StatusOK, gin.H{"message": msg})
 }
+
+// Calcula saldo do usuário após uma transação
+func CalculateBalanceAfterTransaction(
+	c *gin.Context,
+	amount, balance float64,
+	txType string,
+) (float64, error) {
+	if txType == "income" {
+		after_balance := balance + amount
+		RespondMessage(c, "Transação feita com sucesso")
+		return after_balance, nil
+	}
+
+	if txType == "expense" {
+		after_balance := balance - amount
+		if after_balance < 0 {
+			RespondError(c, http.StatusBadRequest, "Saldo insuficiente")
+			return 0, errors.New("valor da transação ultrapassa o saldo da conta")
+		}
+
+		return after_balance, nil
+	}
+
+	return 0, errors.New("tipo de transação inválida")
+}
