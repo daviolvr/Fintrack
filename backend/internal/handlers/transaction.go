@@ -52,26 +52,6 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	// Busca o saldo atual do usuário
-	user, err := repository.FindUserByID(h.DB, userID)
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
-		return
-	}
-
-	// Calcula o novo saldo
-	newBalance, err := utils.CalculateBalanceAfterTransaction(c, input.Amount, user.Balance, input.Type)
-	if err != nil {
-		return
-	}
-
-	// Atualiza saldo no banco
-	user.Balance = newBalance
-	if err := repository.UpdateUserBalance(h.DB, user); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao atualizar saldo")
-		return
-	}
-
 	transaction := models.Transaction{
 		UserID:      userID,
 		CategoryID:  input.CategoryID,

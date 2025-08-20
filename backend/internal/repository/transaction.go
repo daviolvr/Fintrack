@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -10,13 +11,39 @@ import (
 
 // Cria transação
 func CreateTransaction(db *sql.DB, t *models.Transaction) error {
+	// Começa a transação
+	sqlTx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Pega saldo atual do usuário
+	var currentBalance float64
+	err = sqlTx.QueryRow(`
+		SELECT balance
+		FROM users
+		WHERE id = $1
+		FOR UPDATE
+	`, t.UserID).Scan(&currentBalance)
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Se for despesa e não tiver asldo suficiente, bloqueia
+	if t.Type == "expense" && currentBalance < t.Amount {
+		sqlTx.Rollback()
+		return fmt.Errorf("saldo insuficiente")
+	}
+
+	// Insere a transação
 	query := `
 		INSERT INTO transactions (user_id, category_id, type, amount, description, date, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 		RETURNING id
 	`
 
-	return db.QueryRow(
+	err = sqlTx.QueryRow(
 		query,
 		t.UserID,
 		t.CategoryID,
@@ -25,6 +52,31 @@ func CreateTransaction(db *sql.DB, t *models.Transaction) error {
 		t.Description,
 		t.Date,
 	).Scan(&t.ID)
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Atualiza o saldo
+	var balanceChange float64
+	if t.Type == "income" {
+		balanceChange = t.Amount
+	} else {
+		balanceChange = -t.Amount
+	}
+
+	_, err = sqlTx.Exec(`
+		UPDATE users
+		SET balance = balance + $1, updated_at = NOW()
+		WHERE id = $2
+	`, balanceChange, t.UserID)
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Confirma a transação
+	return sqlTx.Commit()
 }
 
 // Busca uma única transação do usuário
