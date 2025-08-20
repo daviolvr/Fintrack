@@ -277,11 +277,13 @@ const docTemplate = `{
                 "summary": "Atualiza token de acesso",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Refresh Token",
                         "name": "refresh_token",
-                        "in": "path",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/utils.RefreshTokenInput"
+                        }
                     }
                 ],
                 "responses": {
@@ -923,6 +925,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.RefreshTokenInput": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
                     "type": "string"
                 }
             }

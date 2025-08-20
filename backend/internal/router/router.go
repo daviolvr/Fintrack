@@ -21,7 +21,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// Rotas de auth
 	r.POST("/api/v1/register", authHandler.Register)
 	r.POST("/api/v1/login", authHandler.Login)
-	r.POST("api/v1/refresh", handlers.RefreshToken)
+	r.POST("api/v1/refresh", authHandler.RefreshToken)
 
 	// Rotas de user
 	v1.GET("/users/me", userHandler.Me)

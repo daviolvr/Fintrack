@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -62,4 +64,35 @@ func HandleNotFound(c *gin.Context, err error, msg string) bool {
 // Resposta de sucesso com mensagem
 func RespondMessage(c *gin.Context, msg string) {
 	c.JSON(http.StatusOK, gin.H{"message": msg})
+}
+
+// Valida o formato do email e os domínios
+func ValidateEmail(email string, allowedDomains []string) error {
+	// Regex pra validar formato básico de email
+	const emailRegex = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(emailRegex)
+
+	if !re.MatchString(email) {
+		return errors.New("email inválido")
+	}
+
+	if len(allowedDomains) > 0 {
+		parts := strings.Split(email, "@")
+		if len(parts) != 2 {
+			return errors.New("email inválido")
+		}
+		domain := parts[1]
+		allowed := false
+		for _, d := range allowedDomains {
+			if strings.EqualFold(domain, d) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return errors.New("domínio de email não permitido")
+		}
+	}
+
+	return nil
 }

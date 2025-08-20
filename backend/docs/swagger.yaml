@@ -55,6 +55,13 @@ definitions:
       message:
         type: string
     type: object
+  utils.RefreshTokenInput:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
   utils.RegisterInput:
     properties:
       email:
@@ -317,10 +324,11 @@ paths:
       description: Atualiza token de acesso do usuário
       parameters:
       - description: Refresh Token
-        in: path
+        in: body
         name: refresh_token
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/utils.RefreshTokenInput'
       produces:
       - application/json
       responses:

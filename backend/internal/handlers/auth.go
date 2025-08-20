@@ -48,6 +48,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Valida o email
+	if err := utils.ValidateEmail(input.Email, []string{"gmail.com", "outlook.com"}); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	user := models.User{
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
@@ -125,12 +131,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param refresh_token path string true "Refresh Token"
+// @Param refresh_token body utils.RefreshTokenInput true "Refresh Token"
 // @Success 200 {object} utils.MessageResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /refresh [post]
-func RefreshToken(c *gin.Context) {
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var input utils.RefreshTokenInput
 
 	// Faz o bind do JSON
