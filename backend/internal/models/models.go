@@ -5,14 +5,16 @@ import (
 )
 
 type User struct {
-	ID        int64     `json:"id" db:"id"`
-	FirstName string    `json:"first_name" db:"first_name"`
-	LastName  string    `json:"last_name" db:"last_name"`
-	Email     string    `json:"email" db:"email"`
-	Password  string    `json:"-" db:"password_hash"`
-	Balance   float64   `json:"balance" db:"balance"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID           int64      `json:"id" db:"id"`
+	FirstName    string     `json:"first_name" db:"first_name"`
+	LastName     string     `json:"last_name" db:"last_name"`
+	Email        string     `json:"email" db:"email"`
+	Password     string     `json:"-" db:"password_hash"`
+	Balance      float64    `json:"balance" db:"balance"`
+	FailedLogins int64      `json:"failed_logins" db:"failed_logins"`
+	LockedUntil  *time.Time `json:"locked_until,omitempty" db:"locked_until"`
+	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 // Categoria da transação (ex: Alimentação, Transporte)

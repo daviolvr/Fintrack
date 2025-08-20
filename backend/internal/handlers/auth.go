@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/daviolvr/Fintrack/internal/auth"
 	"github.com/daviolvr/Fintrack/internal/models"
@@ -98,11 +99,33 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Verifica se o usuário está bloqueado
+	if user.LockedUntil != nil && user.LockedUntil.After(time.Now()) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente mais tarde."})
+		return
+	}
+
 	// Verifica a senha
 	if !utils.CheckPasswordHash(input.Password, user.Password) {
+		// Incrementa contador de tentativas
+		newFailedLogins, err := repository.IncrementFailedLogin(h.DB, user.ID)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Erro ao incrementar falhas de login"})
+			return
+		}
+
+		if newFailedLogins >= 5 {
+			repository.LockUser(h.DB, user.ID, time.Now().Add(10*time.Minute))
+			c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente novamente em 10 minutos."})
+			return
+		}
+
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email ou senha incorretos"})
 		return
 	}
+
+	// Se senha correta, zera contador e desbloqueia
+	repository.ResetFailedLogin(h.DB, user.ID)
 
 	// Gera access token
 	accessToken, err := auth.GenerateJWT(user.ID)

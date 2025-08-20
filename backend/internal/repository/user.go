@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/daviolvr/Fintrack/internal/models"
 )
@@ -111,5 +112,37 @@ func UpdatePassword(db *sql.DB, user *models.User) error {
 		WHERE id = $2
 	`
 	_, err := db.Exec(query, user.Password, user.ID)
+	return err
+}
+
+// Incrementa as falhas de login e retorna o total atualizado
+func IncrementFailedLogin(db *sql.DB, userID int64) (int64, error) {
+	var failedLogins int64
+	err := db.QueryRow(`
+        UPDATE users
+        SET failed_logins = failed_logins + 1
+        WHERE id = $1
+        RETURNING failed_logins
+    `, userID).Scan(&failedLogins)
+	return failedLogins, err
+}
+
+// Bloqueia o acesso do usuário
+func LockUser(db *sql.DB, userID int64, until time.Time) error {
+	_, err := db.Exec(`
+		UPDATE users
+		SET locked_until = $1
+		WHERE ID = $2
+	`, until, userID)
+	return err
+}
+
+// Reseta o contador e tira o bloqueio
+func ResetFailedLogin(db *sql.DB, userID int64) error {
+	_, err := db.Exec(`
+		UPDATE users
+		SET failed_logins = 0, locked_until = NULL
+		WHERE id = $1
+	`, userID)
 	return err
 }

@@ -5,6 +5,8 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     balance NUMERIC(15,2) NOT NULL DEFAULT 0.00,
+    failed_logins INT NOT NULL DEFAULT 0,
+    locked_until TIMESTAMP WITH TIME ZONE;
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
