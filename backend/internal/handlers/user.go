@@ -57,7 +57,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user body utils.UserUpdateInput true "Request body"
+// @Param user body utils.UserUpdateParam true "Request body"
 // @Success 200 {object} utils.MessageResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -70,11 +70,8 @@ func (h *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
-	}
+	var input utils.UserUpdateInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -100,7 +97,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param data body utils.BalanceUpdateInput true "Novo saldo"
+// @Param data body utils.BalanceUpdateParam true "Novo saldo"
 // @Success 200 {object} utils.MessageResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -113,9 +110,8 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Balance float64 `json:"balance"`
-	}
+	var input utils.UserUpdateBalanceInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -151,9 +147,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Password string `json:"password"`
-	}
+	var input utils.UserDeleteInput
 
 	if !utils.BindJSON(c, &input) {
 		return
@@ -182,7 +176,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Summary Atualiza a senha do usuário
 // @Description Atualiza a senha do usuário em questão
 // @Tags user
-// @Param user body utils.UserChangePassword true "Request body"
+// @Param user body utils.UserChangePasswordParam true "Request body"
 // @Success 200 {object} utils.MessageResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -195,10 +189,8 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Password    string `json:"password"`
-		NewPassword string `json:"new_password"`
-	}
+	var input utils.UserUpdatePasswordInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}

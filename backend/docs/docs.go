@@ -230,7 +230,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginInput"
+                            "$ref": "#/definitions/utils.LoginInput"
                         }
                     }
                 ],
@@ -326,7 +326,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterInput"
+                            "$ref": "#/definitions/utils.RegisterInput"
                         }
                     }
                 ],
@@ -421,7 +421,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.TransactionCreateResponse"
+                            "$ref": "#/definitions/utils.TransactionCreateParam"
                         }
                     }
                 ],
@@ -528,7 +528,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.TransactionUpdateResponse"
+                            "$ref": "#/definitions/utils.TransactionUpdateParam"
                         }
                     }
                 ],
@@ -682,7 +682,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.UserUpdateInput"
+                            "$ref": "#/definitions/utils.UserUpdateParam"
                         }
                     }
                 ],
@@ -768,7 +768,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.BalanceUpdateInput"
+                            "$ref": "#/definitions/utils.BalanceUpdateParam"
                         }
                     }
                 ],
@@ -813,7 +813,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.UserChangePassword"
+                            "$ref": "#/definitions/utils.UserChangePasswordParam"
                         }
                     }
                 ],
@@ -841,45 +841,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.LoginInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.RegisterInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "first_name",
-                "last_name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
         "models.Transaction": {
             "type": "object",
             "properties": {
@@ -913,7 +874,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.BalanceUpdateInput": {
+        "utils.BalanceUpdateParam": {
             "type": "object",
             "properties": {
                 "balance": {
@@ -943,6 +904,21 @@ const docTemplate = `{
                 }
             }
         },
+        "utils.LoginInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "utils.MessageResponse": {
             "type": "object",
             "properties": {
@@ -951,7 +927,35 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.TransactionCreateResponse": {
+        "utils.RegisterInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "utils.TransactionCreateParam": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -998,7 +1002,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.TransactionUpdateResponse": {
+        "utils.TransactionUpdateParam": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -1018,7 +1022,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.UserChangePassword": {
+        "utils.UserChangePasswordParam": {
             "type": "object",
             "properties": {
                 "new_password": {
@@ -1049,7 +1053,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.UserUpdateInput": {
+        "utils.UserUpdateParam": {
             "type": "object",
             "properties": {
                 "email": {

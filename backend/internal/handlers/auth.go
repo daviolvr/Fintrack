@@ -18,18 +18,6 @@ type AuthHandler struct {
 	DB *sql.DB
 }
 
-type RegisterInput struct {
-	FirstName string `json:"first_name" binding:"required"`
-	LastName  string `json:"last_name" binding:"required"`
-	Email     string `json:"email" binding:"required,email"`
-	Password  string `json:"password" binding:"required,min=6"`
-}
-
-type LoginInput struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
 func NewAuthHandler(db *sql.DB) *AuthHandler {
 	return &AuthHandler{DB: db}
 }
@@ -40,13 +28,13 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param user body RegisterInput true "Request Body with User data"
+// @Param user body utils.RegisterInput true "Request Body with User data"
 // @Success 201 {object} utils.MessageResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
-	var input RegisterInput
+	var input utils.RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
@@ -83,14 +71,14 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param user body LoginInput true "Request body"
+// @Param user body utils.LoginInput true "Request body"
 // @Success 200 {object} utils.MessageResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var input LoginInput
+	var input utils.LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
@@ -143,12 +131,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /refresh [post]
 func RefreshToken(c *gin.Context) {
-	var body struct {
-		RefreshToken string `json:"refresh_token" binding:"required"`
-	}
+	var input utils.RefreshTokenInput
 
 	// Faz o bind do JSON
-	if !utils.BindJSON(c, &body) {
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
@@ -156,7 +142,7 @@ func RefreshToken(c *gin.Context) {
 	jwtRefreshSecret := []byte(os.Getenv("JWT_REFRESH_SECRET"))
 
 	// Valida o refresh token
-	token, err := jwt.Parse(body.RefreshToken, func(token *jwt.Token) (any, error) {
+	token, err := jwt.Parse(input.RefreshToken, func(token *jwt.Token) (any, error) {
 		return jwtRefreshSecret, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 

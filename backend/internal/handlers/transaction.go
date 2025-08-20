@@ -26,7 +26,7 @@ func NewTransactionHandler(db *sql.DB) *TransactionHandler {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Param transaction body utils.TransactionCreateResponse true "Request body"
+// @Param transaction body utils.TransactionCreateParam true "Request body"
 // @Success 201
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
@@ -40,13 +40,8 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		CategoryID  int64   `json:"category_id" binding:"required"`
-		Type        string  `json:"type" binding:"required,oneof=income expense"`
-		Amount      float64 `json:"amount" binding:"required,gt=0"`
-		Description string  `json:"description"`
-		Date        string  `json:"date" binding:"required,datetime=2006-01-02"`
-	}
+	var input utils.TransactionInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -264,7 +259,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Param transaction body utils.TransactionUpdateResponse true "Request body"
+// @Param transaction body utils.TransactionUpdateParam true "Request body"
 // @Success 200 {object} utils.MessageResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
@@ -285,13 +280,8 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		CategoryID  int64   `json:"category_id" binding:"required"`
-		Type        string  `json:"type" binding:"required,oneof=income expense"`
-		Amount      float64 `json:"amount" binding:"required,gt=0"`
-		Description string  `json:"description"`
-		Date        string  `json:"date" binding:"required,datetime=2006-01-02"`
-	}
+	var input utils.TransactionInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}

@@ -39,9 +39,8 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Name string `json:"name" binding:"required,min=2"`
-	}
+	var input utils.CategoryInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -131,9 +130,8 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Name string `json:"name" binding:"required,min=2"`
-	}
+	var input utils.CategoryInput
+
 	if !utils.BindJSON(c, &input) {
 		return
 	}

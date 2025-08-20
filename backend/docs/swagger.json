@@ -219,7 +219,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginInput"
+                            "$ref": "#/definitions/utils.LoginInput"
                         }
                     }
                 ],
@@ -315,7 +315,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterInput"
+                            "$ref": "#/definitions/utils.RegisterInput"
                         }
                     }
                 ],
@@ -410,7 +410,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.TransactionCreateResponse"
+                            "$ref": "#/definitions/utils.TransactionCreateParam"
                         }
                     }
                 ],
@@ -517,7 +517,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.TransactionUpdateResponse"
+                            "$ref": "#/definitions/utils.TransactionUpdateParam"
                         }
                     }
                 ],
@@ -671,7 +671,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.UserUpdateInput"
+                            "$ref": "#/definitions/utils.UserUpdateParam"
                         }
                     }
                 ],
@@ -757,7 +757,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.BalanceUpdateInput"
+                            "$ref": "#/definitions/utils.BalanceUpdateParam"
                         }
                     }
                 ],
@@ -802,7 +802,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.UserChangePassword"
+                            "$ref": "#/definitions/utils.UserChangePasswordParam"
                         }
                     }
                 ],
@@ -830,45 +830,6 @@
         }
     },
     "definitions": {
-        "handlers.LoginInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.RegisterInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "first_name",
-                "last_name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
         "models.Transaction": {
             "type": "object",
             "properties": {
@@ -902,7 +863,7 @@
                 }
             }
         },
-        "utils.BalanceUpdateInput": {
+        "utils.BalanceUpdateParam": {
             "type": "object",
             "properties": {
                 "balance": {
@@ -932,6 +893,21 @@
                 }
             }
         },
+        "utils.LoginInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "utils.MessageResponse": {
             "type": "object",
             "properties": {
@@ -940,7 +916,35 @@
                 }
             }
         },
-        "utils.TransactionCreateResponse": {
+        "utils.RegisterInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "utils.TransactionCreateParam": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -987,7 +991,7 @@
                 }
             }
         },
-        "utils.TransactionUpdateResponse": {
+        "utils.TransactionUpdateParam": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -1007,7 +1011,7 @@
                 }
             }
         },
-        "utils.UserChangePassword": {
+        "utils.UserChangePasswordParam": {
             "type": "object",
             "properties": {
                 "new_password": {
@@ -1038,7 +1042,7 @@
                 }
             }
         },
-        "utils.UserUpdateInput": {
+        "utils.UserUpdateParam": {
             "type": "object",
             "properties": {
                 "email": {

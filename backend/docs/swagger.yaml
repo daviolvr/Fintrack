@@ -1,31 +1,4 @@
 definitions:
-  handlers.LoginInput:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  handlers.RegisterInput:
-    properties:
-      email:
-        type: string
-      first_name:
-        type: string
-      last_name:
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - first_name
-    - last_name
-    - password
-    type: object
   models.Transaction:
     properties:
       amount:
@@ -48,7 +21,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  utils.BalanceUpdateInput:
+  utils.BalanceUpdateParam:
     properties:
       balance:
         type: number
@@ -67,12 +40,43 @@ definitions:
       error:
         type: string
     type: object
+  utils.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
   utils.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  utils.TransactionCreateResponse:
+  utils.RegisterInput:
+    properties:
+      email:
+        type: string
+      first_name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      last_name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  utils.TransactionCreateParam:
     properties:
       amount:
         type: number
@@ -103,7 +107,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  utils.TransactionUpdateResponse:
+  utils.TransactionUpdateParam:
     properties:
       amount:
         type: number
@@ -116,7 +120,7 @@ definitions:
       type:
         type: string
     type: object
-  utils.UserChangePassword:
+  utils.UserChangePasswordParam:
     properties:
       new_password:
         type: string
@@ -136,7 +140,7 @@ definitions:
       last_name:
         type: string
     type: object
-  utils.UserUpdateInput:
+  utils.UserUpdateParam:
     properties:
       email:
         type: string
@@ -283,7 +287,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handlers.LoginInput'
+          $ref: '#/definitions/utils.LoginInput'
       produces:
       - application/json
       responses:
@@ -346,7 +350,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handlers.RegisterInput'
+          $ref: '#/definitions/utils.RegisterInput'
       produces:
       - application/json
       responses:
@@ -404,7 +408,7 @@ paths:
         name: transaction
         required: true
         schema:
-          $ref: '#/definitions/utils.TransactionCreateResponse'
+          $ref: '#/definitions/utils.TransactionCreateParam'
       produces:
       - application/json
       responses:
@@ -510,7 +514,7 @@ paths:
         name: transaction
         required: true
         schema:
-          $ref: '#/definitions/utils.TransactionUpdateResponse'
+          $ref: '#/definitions/utils.TransactionUpdateParam'
       produces:
       - application/json
       responses:
@@ -592,7 +596,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.UserUpdateInput'
+          $ref: '#/definitions/utils.UserUpdateParam'
       produces:
       - application/json
       responses:
@@ -624,7 +628,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/utils.BalanceUpdateInput'
+          $ref: '#/definitions/utils.BalanceUpdateParam'
       produces:
       - application/json
       responses:
@@ -654,7 +658,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.UserChangePassword'
+          $ref: '#/definitions/utils.UserChangePasswordParam'
       responses:
         "200":
           description: OK
