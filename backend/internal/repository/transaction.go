@@ -252,24 +252,56 @@ func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
 
 // Deleta uma transação pelo ID e pelo userID
 func DeleteTransactionByUser(db *sql.DB, userID int64, transactionID int64) error {
-	query := `
+	sqlTx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Pega a transação pra saber o valor
+	var amount float64
+	var txType string
+	err = sqlTx.QueryRow(`
+		SELECT amount, type
+		FROM transactions
+		WHERE id = $1 AND user_id = $2
+	`, transactionID, userID).Scan(&amount, &txType)
+
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Deleta a transação
+	result, err := sqlTx.Exec(`
 		DELETE FROM transactions
 		WHERE id = $1 AND user_id = $2
-	`
+	`, transactionID, userID)
 
-	result, err := db.Exec(query, transactionID, userID)
 	if err != nil {
+		sqlTx.Rollback()
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		sqlTx.Rollback()
 		return err
 	}
 
 	if rowsAffected == 0 {
+		sqlTx.Rollback()
 		return sql.ErrNoRows
 	}
 
-	return nil
+	// Atualiza saldo do usuário de acordo com tipo de transação deletada
+	if txType == "income" {
+		_, err = sqlTx.Exec(`UPDATE users SET balance = balance - $1 WHERE id = $2`, amount, userID)
+	} else {
+		_, err = sqlTx.Exec(`UPDATE users SET balance = balance + $1 WHERE id = $2`, amount, userID)
+	}
+	if err != nil {
+		sqlTx.Rollback()
+	}
+
+	return sqlTx.Commit()
 }

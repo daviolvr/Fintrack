@@ -324,29 +324,6 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	user, err := repository.FindUserByID(h.DB, userID)
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar usuário")
-		return
-	}
-
-	// Busca a transação a ser deletada
-	transaction, err := repository.RetrieveTransactionByIDAndUserID(h.DB, userID, transactionID)
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao buscar transação")
-		return
-	}
-
-	// Atualiza o saldo do usuário
-	user.Balance += transaction.Amount
-
-	// Salva o novo saldo do usuário no banco
-	err = repository.UpdateUserBalance(h.DB, user)
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
-		return
-	}
-
 	// Deleta a transação
 	err = repository.DeleteTransactionByUser(h.DB, userID, transactionID)
 	if err != nil {
