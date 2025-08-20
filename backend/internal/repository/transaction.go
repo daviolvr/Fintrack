@@ -215,18 +215,39 @@ func FindTransactionsByUser(
 
 // Atualiza uma transação pertencente a um usuário
 func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
+	// Começa a transação
+	sqlTx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Pega a transação atual para saber o saldo antigo
+	var oldAmount float64
+	var oldType string
+	err = sqlTx.QueryRow(`
+		SELECT amount, type
+		FROM transactions
+		WHERE id = $1 AND user_id = $2
+		FOR UPDATE
+	`, t.ID, t.UserID).Scan(&oldAmount, &oldType)
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Atualiza a transação
 	query := `
 		UPDATE transactions
 		SET category_id = $1,
-		type = $2,
-		amount = $3,
-		description = $4,
-		date = $5,
-		updated_at = NOW()
+		    type = $2,
+		    amount = $3,
+		    description = $4,
+		    date = $5,
+		    updated_at = NOW()
 		WHERE id = $6 AND user_id = $7
 	`
 
-	result, err := db.Exec(query,
+	result, err := sqlTx.Exec(query,
 		t.CategoryID,
 		t.Type,
 		t.Amount,
@@ -236,18 +257,65 @@ func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
 		t.UserID,
 	)
 	if err != nil {
+		sqlTx.Rollback()
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		sqlTx.Rollback()
 		return err
 	}
 	if rowsAffected == 0 {
+		sqlTx.Rollback()
 		return sql.ErrNoRows
 	}
 
-	return nil
+	// Pega saldo atual do usuário
+	var currentBalance float64
+	err = sqlTx.QueryRow(`
+		SELECT balance
+		FROM users
+		WHERE id = $1 FOR UPDATE
+	`, t.UserID).Scan(&currentBalance)
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Remove efeito antigo da transação
+	if oldType == "income" {
+		currentBalance -= oldAmount
+	} else {
+		currentBalance += oldAmount
+	}
+
+	// Aplica novo valor da transação
+	if t.Type == "income" {
+		currentBalance += t.Amount
+	} else {
+		currentBalance -= t.Amount
+	}
+
+	// Checa saldo negativo
+	if currentBalance < 0 {
+		sqlTx.Rollback()
+		return fmt.Errorf("saldo insuficiente")
+	}
+
+	// Atualiza saldo no banco
+	_, err = sqlTx.Exec(`
+		UPDATE users
+		SET balance = $1, updated_at = NOW()
+		WHERE id = $2
+	`, currentBalance, t.UserID)
+	if err != nil {
+		sqlTx.Rollback()
+		return err
+	}
+
+	// Commit da transação
+	return sqlTx.Commit()
 }
 
 // Deleta uma transação pelo ID e pelo userID
