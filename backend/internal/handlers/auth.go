@@ -82,6 +82,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Success 200 {object} utils.MessageResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -99,10 +100,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Verifica se o usuário está bloqueado
-	if user.LockedUntil != nil && user.LockedUntil.After(time.Now()) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente mais tarde."})
-		return
+	now := time.Now()
+
+	// 🔒 Primeiro: checa se o usuário está bloqueado
+	if user.LockedUntil != nil {
+		if user.LockedUntil.After(now) {
+			// Ainda dentro do bloqueio
+			c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente mais tarde."})
+			return
+		} else {
+			// Tempo de bloqueio expirou → libera
+			repository.ResetFailedLogin(h.DB, user.ID)
+			user.LockedUntil = nil
+			user.FailedLogins = 0
+		}
 	}
 
 	// Verifica a senha
@@ -110,12 +121,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		// Incrementa contador de tentativas
 		newFailedLogins, err := repository.IncrementFailedLogin(h.DB, user.ID)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Erro ao incrementar falhas de login"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao incrementar falhas de login"})
 			return
 		}
 
+		// Se atingiu o limite, bloqueia por 10 minutos
 		if newFailedLogins >= 5 {
-			repository.LockUser(h.DB, user.ID, time.Now().Add(10*time.Minute))
+			repository.LockUser(h.DB, user.ID, now.Add(10*time.Minute))
 			c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente novamente em 10 minutos."})
 			return
 		}
@@ -124,8 +136,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Se senha correta, zera contador e desbloqueia
-	repository.ResetFailedLogin(h.DB, user.ID)
+	// Se senha correta, zera contador
+	if user.FailedLogins > 0 {
+		repository.ResetFailedLogin(h.DB, user.ID)
+	}
 
 	// Gera access token
 	accessToken, err := auth.GenerateJWT(user.ID)
@@ -141,7 +155,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Retorna token
+	// Retorna tokens
 	c.JSON(http.StatusOK, gin.H{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
