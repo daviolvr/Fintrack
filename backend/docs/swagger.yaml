@@ -1,26 +1,4 @@
 definitions:
-  models.Transaction:
-    properties:
-      amount:
-        type: number
-      category_id:
-        type: integer
-      created_at:
-        type: string
-      date:
-        type: string
-      description:
-        type: string
-      id:
-        type: integer
-      type:
-        description: '"income" ou "expense"'
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-    type: object
   utils.BalanceUpdateParam:
     properties:
       balance:
@@ -58,6 +36,21 @@ definitions:
       data:
         items:
           $ref: '#/definitions/utils.CategoryResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  utils.PaginatedTransactionResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/utils.TransactionGetResponse'
         type: array
       limit:
         type: integer
@@ -435,7 +428,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.TransactionGetResponse'
+            $ref: '#/definitions/utils.PaginatedTransactionResponse'
         "400":
           description: Bad Request
           schema:
@@ -543,7 +536,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Transaction'
+            $ref: '#/definitions/utils.TransactionGetResponse'
         "401":
           description: Unauthorized
           schema:

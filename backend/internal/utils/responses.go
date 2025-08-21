@@ -61,3 +61,11 @@ type TransactionGetResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type PaginatedTransactionResponse struct {
+	Data       []TransactionGetResponse `json:"data"`
+	Total      int                      `json:"total"`
+	Page       int                      `json:"page"`
+	Limit      int                      `json:"limit"`
+	TotalPages int                      `json:"totalPages"`
+}

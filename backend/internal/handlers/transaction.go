@@ -133,7 +133,7 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.TransactionGetResponse
+// @Success 200 {object} utils.PaginatedTransactionResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -242,13 +242,28 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":       transactions,
-		"page":       page,
-		"limit":      limit,
-		"total":      total,
-		"totalPages": (total + limit - 1) / limit,
-	})
+	var transactionResponses []utils.TransactionGetResponse
+	for _, t := range transactions {
+		transactionResponses = append(transactionResponses, utils.TransactionGetResponse{
+			CategoryID:  t.CategoryID,
+			Type:        t.Type,
+			Amount:      t.Amount,
+			Description: t.Description,
+			Date:        t.Date,
+			CreatedAt:   t.CreatedAt,
+			UpdatedAt:   t.UpdatedAt,
+		})
+	}
+
+	resp := utils.PaginatedTransactionResponse{
+		Data:       transactionResponses,
+		Total:      total,
+		Page:       page,
+		Limit:      limit,
+		TotalPages: (total + limit - 1) / limit,
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1
