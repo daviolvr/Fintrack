@@ -84,7 +84,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da transação"
-// @Success 200 {object} utils.TransactionGetResponse
+// @Success 200 {object} utils.TransactionResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -114,7 +114,7 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 		return
 	}
 
-	resp := utils.TransactionGetResponse{
+	resp := utils.TransactionResponse{
 		CategoryID:  transaction.CategoryID,
 		Type:        transaction.Type,
 		Amount:      transaction.Amount,
@@ -242,9 +242,9 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		return
 	}
 
-	var transactionResponses []utils.TransactionGetResponse
+	var transactionResponses []utils.TransactionResponse
 	for _, t := range transactions {
-		transactionResponses = append(transactionResponses, utils.TransactionGetResponse{
+		transactionResponses = append(transactionResponses, utils.TransactionResponse{
 			CategoryID:  t.CategoryID,
 			Type:        t.Type,
 			Amount:      t.Amount,
@@ -273,7 +273,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param transaction body utils.TransactionUpdateParam true "Request body"
-// @Success 200 {object} utils.MessageResponse
+// @Success 200 {object} utils.TransactionResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -282,11 +282,11 @@ func (h *TransactionHandler) List(c *gin.Context) {
 func (h *TransactionHandler) Update(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
-	// ID da transação
+	// Pega o ID da transação
 	transactionID, err := utils.GetIDParam(c, "id")
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
@@ -294,7 +294,6 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	}
 
 	var input utils.TransactionInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -307,7 +306,7 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	}
 
 	// Monta transação para atualização
-	transaction := models.Transaction{
+	updatedTransaction := models.Transaction{
 		ID:          transactionID,
 		UserID:      userID,
 		CategoryID:  input.CategoryID,
@@ -318,8 +317,9 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	}
 
 	// Atualiza no banco
-	err = repository.UpdateTransaction(h.DB, &transaction)
-	if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
+	err = repository.UpdateTransaction(h.DB, &updatedTransaction)
+	if err == sql.ErrNoRows {
+		utils.RespondError(c, http.StatusNotFound, "Transação não encontrada")
 		return
 	}
 	if err != nil {
@@ -327,7 +327,18 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 		return
 	}
 
-	utils.RespondMessage(c, "Transação atualizada com sucesso")
+	// Monta resposta
+	resp := utils.TransactionResponse{
+		CategoryID:  updatedTransaction.CategoryID,
+		Type:        updatedTransaction.Type,
+		Amount:      updatedTransaction.Amount,
+		Description: updatedTransaction.Description,
+		Date:        updatedTransaction.Date,
+		CreatedAt:   updatedTransaction.CreatedAt,
+		UpdatedAt:   time.Now(),
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1

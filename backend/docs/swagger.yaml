@@ -50,7 +50,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/utils.TransactionGetResponse'
+          $ref: '#/definitions/utils.TransactionResponse'
         type: array
       limit:
         type: integer
@@ -116,7 +116,7 @@ definitions:
         description: '"income" ou "expense"'
         type: string
     type: object
-  utils.TransactionGetResponse:
+  utils.TransactionResponse:
     properties:
       amount:
         type: number
@@ -536,7 +536,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.TransactionGetResponse'
+            $ref: '#/definitions/utils.TransactionResponse'
         "401":
           description: Unauthorized
           schema:
@@ -571,7 +571,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/utils.TransactionResponse'
         "400":
           description: Bad Request
           schema:

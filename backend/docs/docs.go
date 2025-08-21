@@ -492,7 +492,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.TransactionGetResponse"
+                            "$ref": "#/definitions/utils.TransactionResponse"
                         }
                     },
                     "401": {
@@ -547,7 +547,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.TransactionResponse"
                         }
                     },
                     "400": {
@@ -931,7 +931,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/utils.TransactionGetResponse"
+                        "$ref": "#/definitions/utils.TransactionResponse"
                     }
                 },
                 "limit": {
@@ -1028,7 +1028,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.TransactionGetResponse": {
+        "utils.TransactionResponse": {
             "type": "object",
             "properties": {
                 "amount": {

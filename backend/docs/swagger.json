@@ -481,7 +481,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.TransactionGetResponse"
+                            "$ref": "#/definitions/utils.TransactionResponse"
                         }
                     },
                     "401": {
@@ -536,7 +536,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.TransactionResponse"
                         }
                     },
                     "400": {
@@ -920,7 +920,7 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/utils.TransactionGetResponse"
+                        "$ref": "#/definitions/utils.TransactionResponse"
                     }
                 },
                 "limit": {
@@ -1017,7 +1017,7 @@
                 }
             }
         },
-        "utils.TransactionGetResponse": {
+        "utils.TransactionResponse": {
             "type": "object",
             "properties": {
                 "amount": {

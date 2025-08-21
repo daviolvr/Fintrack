@@ -52,7 +52,7 @@ type TransactionCreateResponse struct {
 	Date        time.Time `json:"date"`
 }
 
-type TransactionGetResponse struct {
+type TransactionResponse struct {
 	CategoryID  int64     `json:"category_id"`
 	Type        string    `json:"type"` // "income" ou "expense"
 	Amount      float64   `json:"amount" db:"amount"`
@@ -63,9 +63,9 @@ type TransactionGetResponse struct {
 }
 
 type PaginatedTransactionResponse struct {
-	Data       []TransactionGetResponse `json:"data"`
-	Total      int                      `json:"total"`
-	Page       int                      `json:"page"`
-	Limit      int                      `json:"limit"`
-	TotalPages int                      `json:"totalPages"`
+	Data       []TransactionResponse `json:"data"`
+	Total      int                   `json:"total"`
+	Page       int                   `json:"page"`
+	Limit      int                   `json:"limit"`
+	TotalPages int                   `json:"totalPages"`
 }
