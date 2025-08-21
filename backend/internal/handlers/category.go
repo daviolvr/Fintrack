@@ -95,13 +95,23 @@ func (h *CategoryHandler) List(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":       categories,
-		"total":      total,
-		"page":       page,
-		"limit":      limit,
-		"totalPages": int(math.Ceil(float64(total) / float64(limit))),
-	})
+	var categoryResponses []utils.CategoryResponse
+	for _, c := range categories {
+		categoryResponses = append(categoryResponses, utils.CategoryResponse{
+			ID:   c.ID,
+			Name: c.Name,
+		})
+	}
+
+	resp := utils.PaginatedCategoriesResponse{
+		Data:       categoryResponses,
+		Total:      total,
+		Page:       page,
+		Limit:      limit,
+		TotalPages: int(math.Ceil(float64(total) / float64(limit))),
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1
@@ -150,7 +160,11 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	utils.RespondMessage(c, "Categoria atualizada com sucesso")
+	resp := utils.CategoryResponse{
+		ID:   category.ID,
+		Name: category.Name,
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1

@@ -20,6 +20,19 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type CategoryResponse struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type PaginatedCategoriesResponse struct {
+	Data       []CategoryResponse `json:"data"`
+	Total      int                `json:"total"`
+	Page       int                `json:"page"`
+	Limit      int                `json:"limit"`
+	TotalPages int                `json:"totalPages"`
+}
+
 type CategoryListResponse struct {
 	ID     int64 `json:"id"`
 	UserID int64 `json:"user_id"`
