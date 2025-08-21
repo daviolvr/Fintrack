@@ -24,7 +24,7 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.UserResponse
+// @Success 200 {object} utils.UserMeResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
@@ -42,13 +42,15 @@ func (h *UserHandler) Me(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"first_name": user.FirstName,
-		"last_name":  user.LastName,
-		"email":      user.Email,
-		"balance":    user.Balance,
-		"created_at": user.CreatedAt,
-	})
+	resp := utils.UserMeResponse{
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Balance:   user.Balance,
+		CreatedAt: user.CreatedAt,
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1
@@ -58,7 +60,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body utils.UserUpdateParam true "Request body"
-// @Success 200 {object} utils.MessageResponse
+// @Success 200 {object} utils.UserUpdateResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
@@ -76,19 +78,32 @@ func (h *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	user := models.User{
+	updatedUser := models.User{
 		ID:        userID,
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 		Email:     input.Email,
 	}
 
-	if err := repository.UpdateUser(h.DB, &user); err != nil {
+	if err := repository.UpdateUser(h.DB, &updatedUser); err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
 	}
 
-	utils.RespondMessage(c, "Usuário atualizado com sucesso")
+	user, err := repository.FindUserByID(h.DB, userID)
+	if err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		return
+	}
+
+	resp := utils.UserUpdateResponse{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Email:     input.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1
@@ -98,7 +113,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param data body utils.BalanceUpdateParam true "Novo saldo"
-// @Success 200 {object} utils.MessageResponse
+// @Success 200 {object} utils.UserUpdateBalanceResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
@@ -126,7 +141,9 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 		return
 	}
 
-	utils.RespondMessage(c, "Saldo atualizado com sucesso")
+	resp := utils.UserUpdateBalanceResponse(input)
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1

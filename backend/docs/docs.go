@@ -649,7 +649,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.UserResponse"
+                            "$ref": "#/definitions/utils.UserMeResponse"
                         }
                     },
                     "401": {
@@ -698,7 +698,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.UserUpdateResponse"
                         }
                     },
                     "401": {
@@ -784,7 +784,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.UserUpdateBalanceResponse"
                         }
                     },
                     "401": {
@@ -1072,11 +1072,11 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.UserResponse": {
+        "utils.UserMeResponse": {
             "type": "object",
             "properties": {
                 "balance": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "created_at": {
                     "type": "string"
@@ -1092,9 +1092,34 @@ const docTemplate = `{
                 }
             }
         },
+        "utils.UserUpdateBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                }
+            }
+        },
         "utils.UserUpdateParam": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.UserUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },

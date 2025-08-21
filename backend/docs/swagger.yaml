@@ -147,10 +147,10 @@ definitions:
       password:
         type: string
     type: object
-  utils.UserResponse:
+  utils.UserMeResponse:
     properties:
       balance:
-        type: string
+        type: number
       created_at:
         type: string
       email:
@@ -160,8 +160,24 @@ definitions:
       last_name:
         type: string
     type: object
+  utils.UserUpdateBalanceResponse:
+    properties:
+      balance:
+        type: number
+    type: object
   utils.UserUpdateParam:
     properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  utils.UserUpdateResponse:
+    properties:
+      created_at:
+        type: string
       email:
         type: string
       first_name:
@@ -597,7 +613,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.UserResponse'
+            $ref: '#/definitions/utils.UserMeResponse'
         "401":
           description: Unauthorized
           schema:
@@ -628,7 +644,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/utils.UserUpdateResponse'
         "401":
           description: Unauthorized
           schema:
@@ -660,7 +676,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/utils.UserUpdateBalanceResponse'
         "401":
           description: Unauthorized
           schema:

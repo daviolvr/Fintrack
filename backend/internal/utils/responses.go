@@ -12,12 +12,23 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-type UserResponse struct {
+type UserMeResponse struct {
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
-	Balance   string    `json:"balance"`
+	Balance   float64   `json:"balance"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserUpdateResponse struct {
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserUpdateBalanceResponse struct {
+	Balance float64 `json:"balance"`
 }
 
 type CategoryResponse struct {
