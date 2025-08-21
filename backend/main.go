@@ -8,8 +8,8 @@ import (
 	"github.com/daviolvr/Fintrack/docs"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/router"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +19,7 @@ import (
 func main() {
 	// Carrega o .env
 	_ = godotenv.Load()
-	
+
 	frontEndPort := os.Getenv("FRONTEND_PORT")
 
 	// Conecta ao banco
@@ -33,13 +33,13 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:" + frontEndPort},
-        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        MaxAge:           12 * time.Hour,
-    }))
+		AllowOrigins:     []string{"http://localhost:" + frontEndPort},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Seta as rotas
 	router.SetupRoutes(r, db)
@@ -58,6 +58,5 @@ func main() {
 	}
 
 	// Inicializa o servidor
-	log.Printf("Servidor rodando em http://localhost:%s\n", port)
 	r.Run(":" + port)
 }

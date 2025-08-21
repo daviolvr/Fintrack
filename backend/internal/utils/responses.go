@@ -33,12 +33,6 @@ type PaginatedCategoriesResponse struct {
 	TotalPages int                `json:"totalPages"`
 }
 
-type CategoryListResponse struct {
-	ID     int64 `json:"id"`
-	UserID int64 `json:"user_id"`
-	Name   int64 `json:"name"`
-}
-
 type TransactionGetResponse struct {
 	CategoryID  int64     `json:"category_id"`
 	Type        string    `json:"type"` // "income" ou "expense"

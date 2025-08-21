@@ -37,7 +37,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.CategoryListResponse"
+                            "$ref": "#/definitions/utils.PaginatedCategoriesResponse"
                         }
                     },
                     "401": {
@@ -130,7 +130,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.CategoryResponse"
                         }
                     },
                     "400": {
@@ -890,17 +890,14 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.CategoryListResponse": {
+        "utils.CategoryResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
                 },
                 "name": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -932,6 +929,29 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "utils.PaginatedCategoriesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/utils.CategoryResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },

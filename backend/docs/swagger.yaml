@@ -26,14 +26,12 @@ definitions:
       balance:
         type: number
     type: object
-  utils.CategoryListResponse:
+  utils.CategoryResponse:
     properties:
       id:
         type: integer
       name:
-        type: integer
-      user_id:
-        type: integer
+        type: string
     type: object
   utils.ErrorResponse:
     properties:
@@ -54,6 +52,21 @@ definitions:
     properties:
       message:
         type: string
+    type: object
+  utils.PaginatedCategoriesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/utils.CategoryResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   utils.RefreshTokenInput:
     properties:
@@ -170,7 +183,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.CategoryListResponse'
+            $ref: '#/definitions/utils.PaginatedCategoriesResponse'
         "401":
           description: Unauthorized
           schema:
@@ -265,7 +278,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/utils.CategoryResponse'
         "400":
           description: Bad Request
           schema:

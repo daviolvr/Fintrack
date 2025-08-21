@@ -64,7 +64,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 // @Tags category
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.CategoryListResponse
+// @Success 200 {object} utils.PaginatedCategoriesResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
@@ -121,7 +121,7 @@ func (h *CategoryHandler) List(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da categoria"
-// @Success 200 {object} utils.MessageResponse
+// @Success 200 {object} utils.CategoryResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
