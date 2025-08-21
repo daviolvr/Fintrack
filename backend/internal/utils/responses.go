@@ -44,6 +44,14 @@ type PaginatedCategoriesResponse struct {
 	TotalPages int                `json:"totalPages"`
 }
 
+type TransactionCreateResponse struct {
+	CategoryID  int64     `json:"category_id"`
+	Type        string    `json:"type"` // "income" ou "expense"
+	Amount      float64   `json:"amount" db:"amount"`
+	Description string    `json:"description"`
+	Date        time.Time `json:"date"`
+}
+
 type TransactionGetResponse struct {
 	CategoryID  int64     `json:"category_id"`
 	Type        string    `json:"type"` // "income" ou "expense"

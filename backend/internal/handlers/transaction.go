@@ -27,7 +27,7 @@ func NewTransactionHandler(db *sql.DB) *TransactionHandler {
 // @Accept json
 // @Produce json
 // @Param transaction body utils.TransactionCreateParam true "Request body"
-// @Success 201
+// @Success 201 {object} utils.TransactionCreateResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -66,7 +66,15 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, transaction)
+	resp := utils.TransactionCreateResponse{
+		CategoryID:  input.CategoryID,
+		Type:        input.Type,
+		Amount:      input.Amount,
+		Description: input.Description,
+		Date:        parsedDate,
+	}
+
+	c.JSON(http.StatusCreated, resp)
 }
 
 // @BasePath /api/v1

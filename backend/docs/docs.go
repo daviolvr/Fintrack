@@ -435,7 +435,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/utils.TransactionCreateResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1010,6 +1013,27 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.TransactionCreateResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "\"income\" ou \"expense\"",
                     "type": "string"
                 }
             }
