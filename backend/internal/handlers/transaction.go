@@ -84,7 +84,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da transação"
-// @Success 200 {object} models.Transaction
+// @Success 200 {object} utils.TransactionGetResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -114,7 +114,17 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, transaction)
+	resp := utils.TransactionGetResponse{
+		CategoryID:  transaction.CategoryID,
+		Type:        transaction.Type,
+		Amount:      transaction.Amount,
+		Description: transaction.Description,
+		Date:        transaction.Date,
+		CreatedAt:   transaction.CreatedAt,
+		UpdatedAt:   transaction.UpdatedAt,
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 // @BasePath /api/v1
