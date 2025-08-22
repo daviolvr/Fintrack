@@ -18,10 +18,10 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 
 	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
 
-	// Rotas de auth
+	// Rotas públicas (sem Auth)
 	r.POST("/api/v1/register", authHandler.Register)
 	r.POST("/api/v1/login", authHandler.Login)
-	r.POST("api/v1/refresh", authHandler.RefreshToken)
+	r.POST("/api/v1/refresh", authHandler.RefreshToken)
 
 	// Rotas de user
 	v1.GET("/users/me", userHandler.Me)
