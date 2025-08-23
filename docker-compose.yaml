@@ -1,12 +1,13 @@
 services:
   fintrack-backend:
     container_name: fintrack-backend
-    env_file: 
-      - ./.env.docker
     build:
-      context: ./backend/
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "8001:8001"
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file: 
+      - ./.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -14,7 +15,7 @@ services:
   postgres:
     image: postgres:17
     env_file:
-      - ./.env.docker
+      - ./.env
     restart: "always"
     environment:
       TZ: "America/Sao_Paulo"
@@ -23,7 +24,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d finances"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10

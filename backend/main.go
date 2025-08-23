@@ -43,7 +43,7 @@ func main() {
 
 	// Tenta usar a porta do .env
 	// Caso não tenha porta no .env, usa default 8080
-	port := os.Getenv("PORT")
+	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8080" // default
 	}
