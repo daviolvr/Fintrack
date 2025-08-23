@@ -5,14 +5,18 @@ import (
 
 	"github.com/daviolvr/Fintrack/api/handlers"
 	"github.com/daviolvr/Fintrack/api/middlewares"
+	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRoutes(r *gin.Engine, db *sql.DB) {
+	// Inicializa serviços
+	userService := services.NewUserService(db)
+
 	authHandler := handlers.NewAuthHandler(db)
-	userHandler := handlers.NewUserHandler(db)
+	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(db)
 	transactionHandler := handlers.NewTransactionHandler(db)
 

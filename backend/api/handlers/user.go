@@ -1,21 +1,19 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 
-	"github.com/daviolvr/Fintrack/internal/models"
-	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	DB *sql.DB
+	Service *services.UserService
 }
 
-func NewUserHandler(db *sql.DB) *UserHandler {
-	return &UserHandler{DB: db}
+func NewUserHandler(service *services.UserService) *UserHandler {
+	return &UserHandler{Service: service}
 }
 
 // @BasePath /api/v1
@@ -32,11 +30,11 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 func (h *UserHandler) Me(c *gin.Context) {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
 		return
 	}
 
-	user, err := repository.FindUserByID(h.DB, userID)
+	user, err := h.Service.GetUser(userID)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
 		return
@@ -73,33 +71,20 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	var input utils.UserUpdateInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	updatedUser := models.User{
-		ID:        userID,
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Email:     input.Email,
-	}
-
-	if err := repository.UpdateUser(h.DB, &updatedUser); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
-		return
-	}
-
-	user, err := repository.FindUserByID(h.DB, userID)
+	user, err := h.Service.UpdateUser(userID, input)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	resp := utils.UserUpdateResponse{
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Email:     input.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 	}
 
@@ -126,24 +111,16 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 	}
 
 	var input utils.UserUpdateBalanceInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	user := models.User{
-		ID:      userID,
-		Balance: input.Balance,
-	}
-
-	if err := repository.UpdateUserBalance(h.DB, &user); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+	if err := h.Service.UpdateBalance(userID, input.Balance); err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	resp := utils.UserUpdateBalanceResponse(input)
-
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, utils.UserUpdateBalanceResponse(input))
 }
 
 // @BasePath /api/v1
@@ -165,24 +142,12 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	}
 
 	var input utils.UserDeleteInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	user, err := repository.FindUserByID(h.DB, userID)
-	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
-		return
-	}
-
-	if !utils.CheckPasswordHash(input.Password, user.Password) {
-		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
-		return
-	}
-
-	if err := repository.DeleteUser(h.DB, userID); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+	if err := h.Service.DeleteUser(userID, input.Password); err != nil {
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -207,35 +172,12 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	}
 
 	var input utils.UserUpdatePasswordInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	user, err := repository.FindUserByID(h.DB, userID)
-	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
-		return
-	}
-
-	if !utils.CheckPasswordHash(input.Password, user.Password) {
-		utils.RespondError(c, http.StatusUnauthorized, utils.ErrUnauthorized.Error())
-		return
-	}
-
-	hashedPassword, err := utils.HashPassword(input.NewPassword)
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
-		return
-	}
-
-	updatedUser := models.User{
-		ID:       userID,
-		Password: hashedPassword,
-	}
-
-	if err := repository.UpdatePassword(h.DB, &updatedUser); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+	if err := h.Service.UpdatePassword(userID, input.Password, input.NewPassword); err != nil {
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 

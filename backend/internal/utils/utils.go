@@ -19,13 +19,13 @@ var (
 )
 
 // Pega o ID do usuário e retorna
-func GetUserID(c *gin.Context) (int64, error) {
+func GetUserID(c *gin.Context) (uint, error) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
 		return 0, errors.New("usuário não autenticado")
 	}
 
-	userID, ok := userIDValue.(int64)
+	userID, ok := userIDValue.(uint)
 	if !ok {
 		return 0, errors.New("ID do usuário inválido")
 	}

@@ -49,7 +49,7 @@ func FindUserByEmail(db *sql.DB, email string) (*models.User, error) {
 }
 
 // Busca usuário pelo ID
-func FindUserByID(db *sql.DB, id int64) (*models.User, error) {
+func FindUserByID(db *sql.DB, id uint) (*models.User, error) {
 	query := `
 		SELECT id, first_name, last_name, email, password_hash, balance, created_at, updated_at
 		FROM users 
@@ -98,7 +98,7 @@ func UpdateUserBalance(db *sql.DB, user *models.User) error {
 }
 
 // Deleta o usuário
-func DeleteUser(db *sql.DB, id int64) error {
+func DeleteUser(db *sql.DB, id uint) error {
 	query := `
 		DELETE from users
 		WHERE id = $1
@@ -118,7 +118,7 @@ func UpdatePassword(db *sql.DB, user *models.User) error {
 }
 
 // Incrementa as falhas de login e retorna o total atualizado
-func IncrementFailedLogin(db *sql.DB, userID int64) (int64, error) {
+func IncrementFailedLogin(db *sql.DB, userID uint) (int64, error) {
 	var failedLogins int64
 	err := db.QueryRow(`
         UPDATE users
@@ -130,7 +130,7 @@ func IncrementFailedLogin(db *sql.DB, userID int64) (int64, error) {
 }
 
 // Bloqueia o acesso do usuário até "until"
-func LockUser(db *sql.DB, userID int64, until time.Time) error {
+func LockUser(db *sql.DB, userID uint, until time.Time) error {
 	_, err := db.Exec(`
 		UPDATE users
 		SET locked_until = $1
@@ -140,7 +140,7 @@ func LockUser(db *sql.DB, userID int64, until time.Time) error {
 }
 
 // Reseta o contador e tira o bloqueio (quando login for bem-sucedido)
-func ResetFailedLogin(db *sql.DB, userID int64) error {
+func ResetFailedLogin(db *sql.DB, userID uint) error {
 	_, err := db.Exec(`
 		UPDATE users
 		SET failed_logins = 0, locked_until = NULL
@@ -150,7 +150,7 @@ func ResetFailedLogin(db *sql.DB, userID int64) error {
 }
 
 // Apenas desbloqueia o usuário (quando bloqueio já expirou, mas login ainda não teve sucesso)
-func UnlockUser(db *sql.DB, userID int64) error {
+func UnlockUser(db *sql.DB, userID uint) error {
 	_, err := db.Exec(`
 		UPDATE users
 		SET locked_until = NULL
