@@ -82,7 +82,7 @@ func CreateTransaction(db *sql.DB, t *models.Transaction) error {
 // Busca uma única transação do usuário
 func RetrieveTransactionByIDAndUserID(
 	db *sql.DB,
-	userID, transactionID int64,
+	userID, transactionID uint,
 ) (*models.Transaction, error) {
 	query := `
 		SELECT id, user_id, category_id, type, amount, description, date, created_at, updated_at
@@ -117,9 +117,9 @@ func RetrieveTransactionByIDAndUserID(
 // Busca transação com filtros opcionais
 func FindTransactionsByUser(
 	db *sql.DB,
-	userID int64,
+	userID uint,
 	fromDate, toDate *time.Time,
-	categoryID *int64,
+	categoryID *uint,
 	minAmount, maxAmount *float64,
 	txType *string,
 	page, limit int,
@@ -319,7 +319,7 @@ func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
 }
 
 // Deleta uma transação pelo ID e pelo userID
-func DeleteTransactionByUser(db *sql.DB, userID int64, transactionID int64) error {
+func DeleteTransactionByUser(db *sql.DB, userID uint, transactionID uint) error {
 	sqlTx, err := db.Begin()
 	if err != nil {
 		return err

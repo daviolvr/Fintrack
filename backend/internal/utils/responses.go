@@ -45,7 +45,7 @@ type PaginatedCategoriesResponse struct {
 }
 
 type TransactionCreateResponse struct {
-	CategoryID  int64     `json:"category_id"`
+	CategoryID  uint      `json:"category_id"`
 	Type        string    `json:"type"` // "income" ou "expense"
 	Amount      float64   `json:"amount" db:"amount"`
 	Description string    `json:"description"`
@@ -53,7 +53,7 @@ type TransactionCreateResponse struct {
 }
 
 type TransactionResponse struct {
-	CategoryID  int64     `json:"category_id"`
+	CategoryID  uint      `json:"category_id"`
 	Type        string    `json:"type"` // "income" ou "expense"
 	Amount      float64   `json:"amount" db:"amount"`
 	Description string    `json:"description"`

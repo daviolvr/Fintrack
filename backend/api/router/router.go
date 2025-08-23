@@ -15,11 +15,13 @@ func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// Inicializa serviços
 	userService := services.NewUserService(db)
 	categoryService := services.NewCategoryService(db)
+	transactionService := services.NewTransactionService(db)
 
+	// Inicializa handlers
 	authHandler := handlers.NewAuthHandler(db)
 	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
-	transactionHandler := handlers.NewTransactionHandler(db)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	v1 := r.Group("/api/v1", middlewares.AuthMiddleware())
 

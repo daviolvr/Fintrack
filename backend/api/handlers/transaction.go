@@ -1,23 +1,21 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/daviolvr/Fintrack/internal/models"
-	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type TransactionHandler struct {
-	DB *sql.DB
+	Service *services.TransactionService
 }
 
-func NewTransactionHandler(db *sql.DB) *TransactionHandler {
-	return &TransactionHandler{DB: db}
+func NewTransactionHandler(service *services.TransactionService) *TransactionHandler {
+	return &TransactionHandler{Service: service}
 }
 
 // @BasePath /api/v1
@@ -41,37 +39,22 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 	}
 
 	var input utils.TransactionInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	parsedDate, err := time.Parse("2006-01-02", input.Date)
+	tx, err := h.Service.CreateTransaction(userID, input.CategoryID, input.Type, input.Amount, input.Description, input.Date)
 	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "Data inválida")
-		return
-	}
-
-	transaction := models.Transaction{
-		UserID:      userID,
-		CategoryID:  input.CategoryID,
-		Type:        input.Type,
-		Amount:      input.Amount,
-		Description: input.Description,
-		Date:        parsedDate,
-	}
-
-	if err := repository.CreateTransaction(h.DB, &transaction); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		utils.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	resp := utils.TransactionCreateResponse{
-		CategoryID:  input.CategoryID,
-		Type:        input.Type,
-		Amount:      input.Amount,
-		Description: input.Description,
-		Date:        parsedDate,
+		CategoryID:  tx.CategoryID,
+		Type:        tx.Type,
+		Amount:      tx.Amount,
+		Description: tx.Description,
+		Date:        tx.Date,
 	}
 
 	c.JSON(http.StatusCreated, resp)
@@ -97,31 +80,27 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 		return
 	}
 
-	transactionID, err := utils.GetIDParam(c, "id")
+	paramID, err := utils.GetIDParam(c, "id")
+	id := uint(paramID)
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
-	transaction, err := repository.RetrieveTransactionByIDAndUserID(h.DB, userID, transactionID)
+	tx, err := h.Service.RetrieveTransaction(userID, id)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
-		return
-	}
-
-	if transaction == nil {
-		utils.RespondError(c, http.StatusNotFound, "Transação não encontrada")
+		utils.RespondError(c, http.StatusNotFound, err.Error())
 		return
 	}
 
 	resp := utils.TransactionResponse{
-		CategoryID:  transaction.CategoryID,
-		Type:        transaction.Type,
-		Amount:      transaction.Amount,
-		Description: transaction.Description,
-		Date:        transaction.Date,
-		CreatedAt:   transaction.CreatedAt,
-		UpdatedAt:   transaction.UpdatedAt,
+		CategoryID:  tx.CategoryID,
+		Type:        tx.Type,
+		Amount:      tx.Amount,
+		Description: tx.Description,
+		Date:        tx.Date,
+		CreatedAt:   tx.CreatedAt,
+		UpdatedAt:   tx.UpdatedAt,
 	}
 
 	c.JSON(http.StatusOK, resp)
@@ -146,71 +125,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		return
 	}
 
-	// Filtros de data
-	var fromDatePtr, toDatePtr *time.Time
-	if from := c.Query("from_date"); from != "" {
-		if t, err := time.Parse("2006-01-02", from); err == nil {
-			fromDatePtr = &t
-		} else {
-			utils.RespondError(c, http.StatusBadRequest, "Formato de from_date inválido")
-			return
-		}
-	}
-
-	if to := c.Query("to_date"); to != "" {
-		if t, err := time.Parse("2006-01-02", to); err == nil {
-			toDatePtr = &t
-		} else {
-			utils.RespondError(c, http.StatusBadRequest, "Formato de to_date inválido")
-			return
-		}
-	}
-
-	// Filtro por categoria
-	var categoryIDPtr *int64
-	if cat := c.Query("category_id"); cat != "" {
-		if id, err := strconv.ParseInt(cat, 10, 64); err == nil {
-			categoryIDPtr = &id
-		} else {
-			utils.RespondError(c, http.StatusBadRequest, "category_id inválido")
-			return
-		}
-	}
-
-	// Filtro por valor mínimo
-	var minAmountPtr *float64
-	if min := c.Query("min_amount"); min != "" {
-		if val, err := strconv.ParseFloat(min, 64); err == nil {
-			minAmountPtr = &val
-		} else {
-			utils.RespondError(c, http.StatusBadRequest, "min_amount inválido")
-			return
-		}
-	}
-
-	// Filtro por valor máximo
-	var maxAmountPtr *float64
-	if max := c.Query("max_amount"); max != "" {
-		if val, err := strconv.ParseFloat(max, 64); err == nil {
-			maxAmountPtr = &val
-		} else {
-			utils.RespondError(c, http.StatusBadRequest, "max_mount inválido")
-			return
-		}
-	}
-
-	// Filtro por tipo de transação (income ou expense)
-	var typePtr *string
-	if t := c.Query("type"); t != "" {
-		if t == "income" || t == "expense" {
-			typePtr = &t
-		} else {
-			utils.RespondError(c, http.StatusBadRequest, "type deve ser 'income' ou 'expense'")
-			return
-		}
-	}
-
-	// Parâmetros de paginação
+	// Conversões de query params
 	page := 1
 	limit := 10
 	if p := c.Query("page"); p != "" {
@@ -218,45 +133,70 @@ func (h *TransactionHandler) List(c *gin.Context) {
 			page = val
 		}
 	}
-
 	if l := c.Query("limit"); l != "" {
 		if val, err := strconv.Atoi(l); err == nil && val > 0 {
 			limit = val
 		}
 	}
 
-	transactions, total, err := repository.FindTransactionsByUser(
-		h.DB,
-		userID,
-		fromDatePtr,
-		toDatePtr,
-		categoryIDPtr,
-		minAmountPtr,
-		maxAmountPtr,
-		typePtr,
-		page,
-		limit,
-	)
+	var fromDatePtr, toDatePtr *time.Time
+	if from := c.Query("from_date"); from != "" {
+		if t, err := time.Parse("2006-01-02", from); err == nil {
+			fromDatePtr = &t
+		}
+	}
+	if to := c.Query("to_date"); to != "" {
+		if t, err := time.Parse("2006-01-02", to); err == nil {
+			toDatePtr = &t
+		}
+	}
+
+	var categoryIDPtr *uint
+	if cat := c.Query("category_id"); cat != "" {
+		if id, err := strconv.ParseUint(cat, 10, 64); err == nil {
+			val := uint(id)
+			categoryIDPtr = &val
+		}
+	}
+
+	var minAmountPtr, maxAmountPtr *float64
+	if min := c.Query("min_amount"); min != "" {
+		if val, err := strconv.ParseFloat(min, 64); err == nil {
+			minAmountPtr = &val
+		}
+	}
+	if max := c.Query("max_amount"); max != "" {
+		if val, err := strconv.ParseFloat(max, 64); err == nil {
+			maxAmountPtr = &val
+		}
+	}
+
+	var typePtr *string
+	if t := c.Query("type"); t != "" {
+		typePtr = &t
+	}
+
+	txs, total, err := h.Service.ListTransactions(userID, fromDatePtr, toDatePtr, categoryIDPtr, minAmountPtr, maxAmountPtr, typePtr, page, limit)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	var transactionResponses []utils.TransactionResponse
-	for _, t := range transactions {
-		transactionResponses = append(transactionResponses, utils.TransactionResponse{
-			CategoryID:  t.CategoryID,
-			Type:        t.Type,
-			Amount:      t.Amount,
-			Description: t.Description,
-			Date:        t.Date,
-			CreatedAt:   t.CreatedAt,
-			UpdatedAt:   t.UpdatedAt,
+	var respTxs []utils.TransactionResponse
+	for _, tx := range txs {
+		respTxs = append(respTxs, utils.TransactionResponse{
+			CategoryID:  tx.CategoryID,
+			Type:        tx.Type,
+			Amount:      tx.Amount,
+			Description: tx.Description,
+			Date:        tx.Date,
+			CreatedAt:   tx.CreatedAt,
+			UpdatedAt:   tx.UpdatedAt,
 		})
 	}
 
 	resp := utils.PaginatedTransactionResponse{
-		Data:       transactionResponses,
+		Data:       respTxs,
 		Total:      total,
 		Page:       page,
 		Limit:      limit,
@@ -287,7 +227,8 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	}
 
 	// Pega o ID da transação
-	transactionID, err := utils.GetIDParam(c, "id")
+	paramID, err := utils.GetIDParam(c, "id")
+	id := uint(paramID)
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
@@ -298,44 +239,20 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 		return
 	}
 
-	// Converte data
-	parsedDate, err := time.Parse("2006-01-02", input.Date)
+	tx, err := h.Service.UpdateTransaction(userID, id, input.CategoryID, input.Type, input.Amount, input.Description, input.Date)
 	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "Data inválida")
+		utils.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// Monta transação para atualização
-	updatedTransaction := models.Transaction{
-		ID:          transactionID,
-		UserID:      userID,
-		CategoryID:  input.CategoryID,
-		Type:        input.Type,
-		Amount:      input.Amount,
-		Description: input.Description,
-		Date:        parsedDate,
-	}
-
-	// Atualiza no banco
-	err = repository.UpdateTransaction(h.DB, &updatedTransaction)
-	if err == sql.ErrNoRows {
-		utils.RespondError(c, http.StatusNotFound, "Transação não encontrada")
-		return
-	}
-	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
-		return
-	}
-
-	// Monta resposta
 	resp := utils.TransactionResponse{
-		CategoryID:  updatedTransaction.CategoryID,
-		Type:        updatedTransaction.Type,
-		Amount:      updatedTransaction.Amount,
-		Description: updatedTransaction.Description,
-		Date:        updatedTransaction.Date,
-		CreatedAt:   updatedTransaction.CreatedAt,
-		UpdatedAt:   time.Now(),
+		CategoryID:  tx.CategoryID,
+		Type:        tx.Type,
+		Amount:      tx.Amount,
+		Description: tx.Description,
+		Date:        tx.Date,
+		CreatedAt:   tx.CreatedAt,
+		UpdatedAt:   tx.UpdatedAt,
 	}
 
 	c.JSON(http.StatusOK, resp)
@@ -362,19 +279,15 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	transactionID, err := utils.GetIDParam(c, "id")
+	paramID, err := utils.GetIDParam(c, "id")
+	id := uint(paramID)
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
-	// Deleta a transação
-	err = repository.DeleteTransactionByUser(h.DB, userID, transactionID)
-	if err != nil {
-		if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
-			return
-		}
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+	if err := h.Service.DeleteTransaction(userID, id); err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

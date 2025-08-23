@@ -21,7 +21,7 @@ type CategoryInput struct {
 }
 
 type TransactionInput struct {
-	CategoryID  int64   `json:"category_id" binding:"required,min=1"`
+	CategoryID  uint    `json:"category_id" binding:"required,min=1"`
 	Type        string  `json:"type" binding:"required,oneof=income expense"`
 	Amount      float64 `json:"amount" binding:"required,gt=0"`
 	Description string  `json:"description" binding:"max=255"`
