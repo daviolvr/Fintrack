@@ -3,8 +3,8 @@ package router
 import (
 	"database/sql"
 
-	"github.com/daviolvr/Fintrack/internal/handlers"
-	"github.com/daviolvr/Fintrack/internal/middlewares"
+	"github.com/daviolvr/Fintrack/api/handlers"
+	"github.com/daviolvr/Fintrack/api/middlewares"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

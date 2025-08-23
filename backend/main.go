@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/daviolvr/Fintrack/api/middlewares"
+	"github.com/daviolvr/Fintrack/api/router"
 	"github.com/daviolvr/Fintrack/docs"
-	"github.com/daviolvr/Fintrack/internal/middlewares"
 	"github.com/daviolvr/Fintrack/internal/repository"
-	"github.com/daviolvr/Fintrack/internal/router"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
