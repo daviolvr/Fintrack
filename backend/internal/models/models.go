@@ -11,7 +11,7 @@ type User struct {
 	Email        string     `json:"email" db:"email"`
 	Password     string     `json:"-" db:"password_hash"`
 	Balance      float64    `json:"balance" db:"balance"`
-	FailedLogins int64      `json:"failed_logins" db:"failed_logins"`
+	FailedLogins uint       `json:"failed_logins" db:"failed_logins"`
 	LockedUntil  *time.Time `json:"locked_until,omitempty" db:"locked_until"`
 	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
@@ -19,15 +19,15 @@ type User struct {
 
 // Categoria da transação (ex: Alimentação, Transporte)
 type Category struct {
-	ID     int64  `json:"id" db:"id"`
-	UserID int64  `json:"user_id" db:"user_id"` // Categoria pode ser custom do Usuário
+	ID     uint   `json:"id" db:"id"`
+	UserID uint   `json:"user_id" db:"user_id"` // Categoria pode ser custom do Usuário
 	Name   string `json:"name" db:"name"`
 }
 
 type Transaction struct {
-	ID          int64     `json:"id" db:"id"`
-	UserID      int64     `json:"user_id" db:"user_id"`
-	CategoryID  int64     `json:"category_id" db:"category_id"`
+	ID          uint      `json:"id" db:"id"`
+	UserID      uint      `json:"user_id" db:"user_id"`
+	CategoryID  uint      `json:"category_id" db:"category_id"`
 	Type        string    `json:"type" db:"type"` // "income" ou "expense"
 	Amount      float64   `json:"amount" db:"amount"`
 	Description string    `json:"description,omitempty" db:"description"`

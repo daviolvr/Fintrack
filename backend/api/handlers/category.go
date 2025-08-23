@@ -1,23 +1,20 @@
 package handlers
 
 import (
-	"database/sql"
-	"math"
 	"net/http"
 	"strconv"
 
-	"github.com/daviolvr/Fintrack/internal/models"
-	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type CategoryHandler struct {
-	DB *sql.DB
+	Service *services.CategoryService
 }
 
-func NewCategoryHandler(db *sql.DB) *CategoryHandler {
-	return &CategoryHandler{DB: db}
+func NewCategoryHandler(service *services.CategoryService) *CategoryHandler {
+	return &CategoryHandler{Service: service}
 }
 
 // @BasePath /api/v1
@@ -40,22 +37,22 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	}
 
 	var input utils.CategoryInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	category := models.Category{
-		UserID: userID,
-		Name:   input.Name,
-	}
-
-	if err := repository.CreateCategory(h.DB, &category); err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+	category, err := h.Service.CreateCategory(userID, input.Name)
+	if err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, category)
+	resp := utils.CategoryResponse{
+		ID:   category.ID,
+		Name: category.Name,
+	}
+
+	c.JSON(http.StatusCreated, resp)
 }
 
 // @BasePath /api/v1
@@ -81,34 +78,26 @@ func (h *CategoryHandler) List(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	search := c.Query("search")
 
-	if page < 1 {
-		page = 1
-	}
-
-	if limit < 1 || limit > 100 {
-		limit = 10
-	}
-
-	categories, total, err := repository.FindCategoriesByUser(h.DB, userID, search, page, limit)
+	categories, total, err := h.Service.ListCategories(userID, search, page, limit)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	var categoryResponses []utils.CategoryResponse
-	for _, c := range categories {
-		categoryResponses = append(categoryResponses, utils.CategoryResponse{
-			ID:   c.ID,
-			Name: c.Name,
+	var respCategories []utils.CategoryResponse
+	for _, cat := range categories {
+		respCategories = append(respCategories, utils.CategoryResponse{
+			ID:   cat.ID,
+			Name: cat.Name,
 		})
 	}
 
 	resp := utils.PaginatedCategoriesResponse{
-		Data:       categoryResponses,
+		Data:       respCategories,
 		Total:      total,
 		Page:       page,
 		Limit:      limit,
-		TotalPages: int(math.Ceil(float64(total) / float64(limit))),
+		TotalPages: h.Service.TotalPages(total, limit),
 	}
 
 	c.JSON(http.StatusOK, resp)
@@ -134,29 +123,24 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	id, err := utils.GetIDParam(c, "id")
+	paramID, err := utils.GetIDParam(c, "id")
+	id := uint(paramID)
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
 	var input utils.CategoryInput
-
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	category := models.Category{
-		ID:     id,
-		UserID: userID,
-		Name:   input.Name,
-	}
-
-	if err := repository.UpdateCategory(h.DB, &category); err != nil {
+	category, err := h.Service.UpdateCategory(userID, id, input.Name)
+	if err != nil {
 		if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
 			return
 		}
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInvalidID.Error())
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -164,6 +148,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		ID:   category.ID,
 		Name: category.Name,
 	}
+
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -188,17 +173,18 @@ func (h *CategoryHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	id, err := utils.GetIDParam(c, "id")
+	paramID, err := utils.GetIDParam(c, "id")
+	id := uint(paramID)
 	if err != nil {
 		utils.RespondError(c, http.StatusBadRequest, utils.ErrInvalidID.Error())
 		return
 	}
 
-	if err := repository.DeleteCategory(h.DB, id, userID); err != nil {
+	if err := h.Service.DeleteCategory(id, userID); err != nil {
 		if utils.HandleNotFound(c, err, utils.ErrNotFound.Error()) {
 			return
 		}
-		utils.RespondError(c, http.StatusInternalServerError, utils.ErrInternalServer.Error())
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

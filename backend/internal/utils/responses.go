@@ -32,7 +32,7 @@ type UserUpdateBalanceResponse struct {
 }
 
 type CategoryResponse struct {
-	ID   int64  `json:"id"`
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 

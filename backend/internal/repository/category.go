@@ -19,7 +19,7 @@ func CreateCategory(db *sql.DB, category *models.Category) error {
 // Busca categorias do usuário
 func FindCategoriesByUser(
 	db *sql.DB,
-	userID int64,
+	userID uint,
 	search string,
 	page, limit int,
 ) ([]models.Category, int, error) {
@@ -97,7 +97,7 @@ func UpdateCategory(db *sql.DB, category *models.Category) error {
 }
 
 // Deleta categoria pelo ID e user_id
-func DeleteCategory(db *sql.DB, id, userID int64) error {
+func DeleteCategory(db *sql.DB, id, userID uint) error {
 	query := `
 		DELETE FROM categories 
 		WHERE id = $1 AND user_id = $2
