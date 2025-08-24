@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/daviolvr/Fintrack/internal/auth"
-	"github.com/daviolvr/Fintrack/internal/models"
-	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 
@@ -16,11 +13,11 @@ import (
 )
 
 type AuthHandler struct {
-	DB *sql.DB
+	Service *services.AuthService
 }
 
-func NewAuthHandler(db *sql.DB) *AuthHandler {
-	return &AuthHandler{DB: db}
+func NewAuthHandler(service *services.AuthService) *AuthHandler {
+	return &AuthHandler{Service: service}
 }
 
 // @BasePath /api/v1
@@ -36,40 +33,16 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 // @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var input utils.RegisterInput
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	// Hasheia a senha
-	hashedPassword, err := utils.HashPassword(input.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao hashear a senha"})
+	if err := h.Service.RegisterUser(input); err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// Valida o email
-	if err := utils.ValidateEmail(input.Email, []string{"gmail.com", "outlook.com"}); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	user := models.User{
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Email:     input.Email,
-		Password:  hashedPassword,
-	}
-
-	if err := repository.CreateUser(h.DB, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar usuário"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Usuário criado com sucesso",
-	})
+	c.JSON(http.StatusCreated, gin.H{"message": "Usuário criado com sucesso"})
 }
 
 // @BasePath /api/v1
@@ -87,75 +60,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var input utils.LoginInput
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
+	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	// Busca usuário pelo email
-	user, err := repository.FindUserByEmail(h.DB, input.Email)
+	accessToken, refreshToken, err := h.Service.LoginUser(input)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email ou senha incorretos"})
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	now := time.Now()
-
-	// 🔒 Primeiro: checa se o usuário está bloqueado
-	if user.LockedUntil != nil {
-		if user.LockedUntil.After(now) {
-			// Ainda dentro do bloqueio
-			c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente mais tarde."})
-			return
-		} else {
-			// Tempo de bloqueio expirou → libera
-			repository.ResetFailedLogin(h.DB, user.ID)
-			user.LockedUntil = nil
-			user.FailedLogins = 0
-		}
-	}
-
-	// Verifica a senha
-	if !utils.CheckPasswordHash(input.Password, user.Password) {
-		// Incrementa contador de tentativas
-		newFailedLogins, err := repository.IncrementFailedLogin(h.DB, user.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao incrementar falhas de login"})
-			return
-		}
-
-		// Se atingiu o limite, bloqueia por 10 minutos
-		if newFailedLogins >= 5 {
-			repository.LockUser(h.DB, user.ID, now.Add(10*time.Minute))
-			c.JSON(http.StatusForbidden, gin.H{"error": "Conta bloqueada. Tente novamente em 10 minutos."})
-			return
-		}
-
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email ou senha incorretos"})
-		return
-	}
-
-	// Se senha correta, zera contador
-	if user.FailedLogins > 0 {
-		repository.ResetFailedLogin(h.DB, user.ID)
-	}
-
-	// Gera access token
-	accessToken, err := auth.GenerateJWT(user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar token"})
-		return
-	}
-
-	// Gera refresh token
-	refreshToken, err := auth.GenerateRefreshToken(user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao gerar refresh token"})
-		return
-	}
-
-	// Retorna tokens
 	c.JSON(http.StatusOK, gin.H{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
@@ -208,7 +122,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Gera novo access token
-	newToken, err := auth.GenerateJWT(int64(userIDFloat))
+	newToken, err := auth.GenerateJWT(uint(userIDFloat))
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Erro ao gerar token")
 		return

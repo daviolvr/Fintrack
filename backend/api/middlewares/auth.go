@@ -46,7 +46,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Injeta user_id no contexto
-		c.Set("user_id", int64(userIDFloat))
+		c.Set("user_id", uint(userIDFloat))
 		c.Next()
 	}
 }

@@ -13,12 +13,13 @@ import (
 
 func SetupRoutes(r *gin.Engine, db *sql.DB) {
 	// Inicializa serviços
+	authService := services.NewAuthService(db)
 	userService := services.NewUserService(db)
 	categoryService := services.NewCategoryService(db)
 	transactionService := services.NewTransactionService(db)
 
 	// Inicializa handlers
-	authHandler := handlers.NewAuthHandler(db)
+	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
