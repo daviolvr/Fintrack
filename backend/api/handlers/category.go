@@ -24,7 +24,7 @@ func NewCategoryHandler(service *services.CategoryService) *CategoryHandler {
 // @Accept json
 // @Produce json
 // @Param name path string true "Nome da categoria"
-// @Success 201
+// @Success 201 {object} utils.CategoryResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 501 {object} utils.ErrorResponse
 // @Security BearerAuth

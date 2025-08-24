@@ -52,7 +52,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body utils.LoginInput true "Request body"
-// @Success 200 {object} utils.MessageResponse
+// @Success 200 {object} utils.LoginResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 403 {object} utils.ErrorResponse
@@ -83,7 +83,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param refresh_token body utils.RefreshTokenInput true "Refresh Token"
-// @Success 200 {object} utils.MessageResponse
+// @Success 200 {object} utils.RefreshTokenResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /refresh [post]

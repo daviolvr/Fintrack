@@ -82,7 +82,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/utils.CategoryResponse"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
@@ -238,7 +241,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.LoginResponse"
                         }
                     },
                     "400": {
@@ -296,7 +299,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.RefreshTokenResponse"
                         }
                     },
                     "401": {
@@ -597,11 +600,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -894,6 +894,17 @@ const docTemplate = `{
                 }
             }
         },
+        "utils.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "utils.MessageResponse": {
             "type": "object",
             "properties": {
@@ -955,6 +966,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
                     "type": "string"
                 }
             }

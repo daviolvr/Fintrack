@@ -71,7 +71,10 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/utils.CategoryResponse"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
@@ -227,7 +230,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.LoginResponse"
                         }
                     },
                     "400": {
@@ -285,7 +288,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
+                            "$ref": "#/definitions/utils.RefreshTokenResponse"
                         }
                     },
                     "401": {
@@ -586,11 +589,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/utils.MessageResponse"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -883,6 +883,17 @@
                 }
             }
         },
+        "utils.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "utils.MessageResponse": {
             "type": "object",
             "properties": {
@@ -944,6 +955,14 @@
             ],
             "properties": {
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
                     "type": "string"
                 }
             }

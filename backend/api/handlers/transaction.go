@@ -265,7 +265,7 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da transação"
-// @Success 200 {object} utils.MessageResponse
+// @Success 204
 // @Failure 401 {object} utils.ErrorResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -291,5 +291,5 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	utils.RespondMessage(c, "Transação deletada com sucesso")
+	c.Status(http.StatusNoContent)
 }

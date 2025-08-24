@@ -26,6 +26,13 @@ definitions:
     - email
     - password
     type: object
+  utils.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   utils.MessageResponse:
     properties:
       message:
@@ -67,6 +74,11 @@ definitions:
         type: string
     required:
     - refresh_token
+    type: object
+  utils.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
     type: object
   utils.RegisterInput:
     properties:
@@ -235,6 +247,8 @@ paths:
       responses:
         "201":
           description: Created
+          schema:
+            $ref: '#/definitions/utils.CategoryResponse'
         "401":
           description: Unauthorized
           schema:
@@ -337,7 +351,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/utils.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -375,7 +389,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/utils.RefreshTokenResponse'
         "401":
           description: Unauthorized
           schema:
@@ -495,10 +509,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.MessageResponse'
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
