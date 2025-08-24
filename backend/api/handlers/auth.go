@@ -2,12 +2,9 @@ package handlers
 
 import (
 	"net/http"
-	"os"
 
-	"github.com/daviolvr/Fintrack/internal/auth"
 	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
-	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
 )
@@ -89,47 +86,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Router /refresh [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var input utils.RefreshTokenInput
-
-	// Faz o bind do JSON
 	if !utils.BindJSON(c, &input) {
 		return
 	}
 
-	// Pega a chave do refresh token
-	jwtRefreshSecret := []byte(os.Getenv("JWT_REFRESH_SECRET"))
-
-	// Valida o refresh token
-	token, err := jwt.Parse(input.RefreshToken, func(token *jwt.Token) (any, error) {
-		return jwtRefreshSecret, nil
-	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
-
-	if err != nil || !token.Valid {
-		utils.RespondError(c, http.StatusUnauthorized, "Refresh token inválido")
-		return
-	}
-
-	// Extrai claims
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		utils.RespondError(c, http.StatusUnauthorized, "Refresh token inválido")
-		return
-	}
-
-	userIDFloat, ok := claims["user_id"].(float64)
-	if !ok {
-		utils.RespondError(c, http.StatusUnauthorized, "Refresh token malformado")
-		return
-	}
-
-	// Gera novo access token
-	newToken, err := auth.GenerateJWT(uint(userIDFloat))
+	newAccessToken, err := h.Service.RefreshToken(input.RefreshToken)
 	if err != nil {
-		utils.RespondError(c, http.StatusInternalServerError, "Erro ao gerar token")
+		utils.RespondError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	// Retorna o novo access token
 	c.JSON(http.StatusOK, gin.H{
-		"access_token": newToken,
+		"access_token": newAccessToken,
 	})
 }

@@ -3,12 +3,14 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"os"
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/auth"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthService struct {
@@ -73,4 +75,34 @@ func (s *AuthService) LoginUser(input utils.LoginInput) (string, string, error) 
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+func (s *AuthService) RefreshToken(refreshToken string) (string, error) {
+	jwtRefreshSecret := []byte(os.Getenv("JWT_REFRESH_SECRET"))
+
+	// Valida o refresh token
+	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (any, error) {
+		return jwtRefreshSecret, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil || !token.Valid {
+		return "", errors.New("refresh token inválido")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("refresh token inválido")
+	}
+
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		return "", errors.New("refresh token malformado")
+	}
+
+	// Gera novo access token
+	newAccessToken, err := auth.GenerateJWT(uint(userIDFloat))
+	if err != nil {
+		return "", err
+	}
+
+	return newAccessToken, nil
 }
