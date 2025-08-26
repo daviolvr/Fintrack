@@ -30,6 +30,10 @@ func (s *CategoryService) CreateCategory(userID uint, name string) (*models.Cate
 	if err := repository.CreateCategory(s.DB, category); err != nil {
 		return nil, err
 	}
+
+	// Invalida cache do usuário
+	s.cache.InvalidateUserCategories(userID)
+
 	return category, nil
 }
 
@@ -53,6 +57,7 @@ func (s *CategoryService) ListCategories(
 	var cached cache.CategoryCacheData
 	found, err := s.cache.Get(cacheKey, &cached)
 	if err == nil && found {
+		fmt.Println("Pegando do cache:", cacheKey)
 		return cached.Categories, cached.Total, nil
 	}
 
@@ -83,6 +88,9 @@ func (s *CategoryService) UpdateCategory(userID, id uint, name string) (*models.
 		return nil, err
 	}
 
+	// Invalida cache do usuário
+	s.cache.InvalidateUserCategories(userID)
+
 	return category, nil
 }
 
@@ -91,6 +99,10 @@ func (s *CategoryService) DeleteCategory(id, userID uint) error {
 	if err := repository.DeleteCategory(s.DB, id, userID); err != nil {
 		return err
 	}
+
+	// Invalida cache do usuário
+	s.cache.InvalidateUserCategories(userID)
+
 	return nil
 }
 

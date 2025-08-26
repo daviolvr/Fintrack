@@ -52,3 +52,14 @@ func (c *Cache) Get(key string, dest any) (bool, error) {
 
 	return true, nil
 }
+
+func (c *Cache) InvalidateUserCategories(userID uint) error {
+	pattern := fmt.Sprintf("categories:%d:*", userID)
+	iter := c.client.Scan(c.ctx, 0, pattern, 0).Iterator()
+	for iter.Next(c.ctx) {
+		if err := c.client.Del(c.ctx, iter.Val()).Err(); err != nil {
+			return err
+		}
+	}
+	return iter.Err()
+}
