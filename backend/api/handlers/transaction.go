@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -24,11 +25,11 @@ func NewTransactionHandler(service *services.TransactionService) *TransactionHan
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Param transaction body utils.TransactionCreateParam true "Request body"
-// @Success 201 {object} utils.TransactionCreateResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param transaction body dto.TransactionCreateParam true "Request body"
+// @Success 201 {object} dto.TransactionCreateResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions [post]
 func (h *TransactionHandler) Create(c *gin.Context) {
@@ -38,7 +39,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	var input utils.TransactionInput
+	var input dto.TransactionInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -49,7 +50,7 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 		return
 	}
 
-	resp := utils.TransactionCreateResponse{
+	resp := dto.TransactionCreateResponse{
 		CategoryID:  tx.CategoryID,
 		Type:        tx.Type,
 		Amount:      tx.Amount,
@@ -67,10 +68,10 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da transação"
-// @Success 200 {object} utils.TransactionResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Success 200 {object} dto.TransactionResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions/{id} [get]
 func (h *TransactionHandler) Retrieve(c *gin.Context) {
@@ -93,7 +94,7 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 		return
 	}
 
-	resp := utils.TransactionResponse{
+	resp := dto.TransactionResponse{
 		CategoryID:  tx.CategoryID,
 		Type:        tx.Type,
 		Amount:      tx.Amount,
@@ -112,10 +113,10 @@ func (h *TransactionHandler) Retrieve(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.PaginatedTransactionResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Success 200 {object} dto.PaginatedTransactionResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions [get]
 func (h *TransactionHandler) List(c *gin.Context) {
@@ -182,9 +183,9 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		return
 	}
 
-	var respTxs []utils.TransactionResponse
+	var respTxs []dto.TransactionResponse
 	for _, tx := range txs {
-		respTxs = append(respTxs, utils.TransactionResponse{
+		respTxs = append(respTxs, dto.TransactionResponse{
 			CategoryID:  tx.CategoryID,
 			Type:        tx.Type,
 			Amount:      tx.Amount,
@@ -195,7 +196,7 @@ func (h *TransactionHandler) List(c *gin.Context) {
 		})
 	}
 
-	resp := utils.PaginatedTransactionResponse{
+	resp := dto.PaginatedTransactionResponse{
 		Data:       respTxs,
 		Total:      total,
 		Page:       page,
@@ -212,11 +213,11 @@ func (h *TransactionHandler) List(c *gin.Context) {
 // @Tags transaction
 // @Accept json
 // @Produce json
-// @Param transaction body utils.TransactionUpdateParam true "Request body"
-// @Success 200 {object} utils.TransactionResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param transaction body dto.TransactionUpdateParam true "Request body"
+// @Success 200 {object} dto.TransactionResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions/{id} [put]
 func (h *TransactionHandler) Update(c *gin.Context) {
@@ -234,7 +235,7 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var input utils.TransactionInput
+	var input dto.TransactionInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -245,7 +246,7 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 		return
 	}
 
-	resp := utils.TransactionResponse{
+	resp := dto.TransactionResponse{
 		CategoryID:  tx.CategoryID,
 		Type:        tx.Type,
 		Amount:      tx.Amount,
@@ -266,10 +267,10 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID da transação"
 // @Success 204
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /transactions/{id} [delete]
 func (h *TransactionHandler) Delete(c *gin.Context) {

@@ -1,4 +1,4 @@
-package utils
+package dto
 
 type UserUpdateParam struct {
 	FirstName string `json:"first_name"`

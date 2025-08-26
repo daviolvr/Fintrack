@@ -1,4 +1,4 @@
-package cache
+package dto
 
 import (
 	"github.com/daviolvr/Fintrack/internal/models"

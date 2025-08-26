@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/cache"
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
@@ -50,7 +51,7 @@ func (s *UserService) GetUser(userID uint) (*models.User, error) {
 // Atualiza dados do usuário
 func (s *UserService) UpdateUser(
 	userID uint,
-	input utils.UserUpdateInput,
+	input dto.UserUpdateInput,
 ) (*models.User, error) {
 	updatedUser := models.User{
 		ID:        userID,

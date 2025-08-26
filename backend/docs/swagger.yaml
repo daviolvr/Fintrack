@@ -1,22 +1,22 @@
 definitions:
-  utils.BalanceUpdateParam:
+  dto.BalanceUpdateParam:
     properties:
       balance:
         type: number
     type: object
-  utils.CategoryResponse:
+  dto.CategoryResponse:
     properties:
       id:
         type: integer
       name:
         type: string
     type: object
-  utils.ErrorResponse:
+  dto.ErrorResponse:
     properties:
       error:
         type: string
     type: object
-  utils.LoginInput:
+  dto.LoginInput:
     properties:
       email:
         type: string
@@ -26,23 +26,23 @@ definitions:
     - email
     - password
     type: object
-  utils.LoginResponse:
+  dto.LoginResponse:
     properties:
       access_token:
         type: string
       refresh_token:
         type: string
     type: object
-  utils.MessageResponse:
+  dto.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  utils.PaginatedCategoriesResponse:
+  dto.PaginatedCategoriesResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/utils.CategoryResponse'
+          $ref: '#/definitions/dto.CategoryResponse'
         type: array
       limit:
         type: integer
@@ -53,11 +53,11 @@ definitions:
       totalPages:
         type: integer
     type: object
-  utils.PaginatedTransactionResponse:
+  dto.PaginatedTransactionResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/utils.TransactionResponse'
+          $ref: '#/definitions/dto.TransactionResponse'
         type: array
       limit:
         type: integer
@@ -68,19 +68,19 @@ definitions:
       totalPages:
         type: integer
     type: object
-  utils.RefreshTokenInput:
+  dto.RefreshTokenInput:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
     type: object
-  utils.RefreshTokenResponse:
+  dto.RefreshTokenResponse:
     properties:
       access_token:
         type: string
     type: object
-  utils.RegisterInput:
+  dto.RegisterInput:
     properties:
       email:
         type: string
@@ -101,7 +101,7 @@ definitions:
     - last_name
     - password
     type: object
-  utils.TransactionCreateParam:
+  dto.TransactionCreateParam:
     properties:
       amount:
         type: number
@@ -114,7 +114,7 @@ definitions:
       type:
         type: string
     type: object
-  utils.TransactionCreateResponse:
+  dto.TransactionCreateResponse:
     properties:
       amount:
         type: number
@@ -128,7 +128,7 @@ definitions:
         description: '"income" ou "expense"'
         type: string
     type: object
-  utils.TransactionResponse:
+  dto.TransactionResponse:
     properties:
       amount:
         type: number
@@ -146,7 +146,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  utils.TransactionUpdateParam:
+  dto.TransactionUpdateParam:
     properties:
       amount:
         type: number
@@ -159,14 +159,14 @@ definitions:
       type:
         type: string
     type: object
-  utils.UserChangePasswordParam:
+  dto.UserChangePasswordParam:
     properties:
       new_password:
         type: string
       password:
         type: string
     type: object
-  utils.UserMeResponse:
+  dto.UserMeResponse:
     properties:
       balance:
         type: number
@@ -179,12 +179,12 @@ definitions:
       last_name:
         type: string
     type: object
-  utils.UserUpdateBalanceResponse:
+  dto.UserUpdateBalanceResponse:
     properties:
       balance:
         type: number
     type: object
-  utils.UserUpdateParam:
+  dto.UserUpdateParam:
     properties:
       email:
         type: string
@@ -193,7 +193,7 @@ definitions:
       last_name:
         type: string
     type: object
-  utils.UserUpdateResponse:
+  dto.UserUpdateResponse:
     properties:
       created_at:
         type: string
@@ -218,15 +218,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.PaginatedCategoriesResponse'
+            $ref: '#/definitions/dto.PaginatedCategoriesResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Lista as categorias
@@ -248,15 +248,15 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/utils.CategoryResponse'
+            $ref: '#/definitions/dto.CategoryResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "501":
           description: Not Implemented
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Cria uma categoria
@@ -281,19 +281,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Deleta uma categoria
@@ -315,19 +315,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.CategoryResponse'
+            $ref: '#/definitions/dto.CategoryResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza uma categoria
@@ -344,30 +344,30 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.LoginInput'
+          $ref: '#/definitions/dto.LoginInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.LoginResponse'
+            $ref: '#/definitions/dto.LoginResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Login de usuários
       tags:
       - auth
@@ -382,22 +382,22 @@ paths:
         name: refresh_token
         required: true
         schema:
-          $ref: '#/definitions/utils.RefreshTokenInput'
+          $ref: '#/definitions/dto.RefreshTokenInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.RefreshTokenResponse'
+            $ref: '#/definitions/dto.RefreshTokenResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Atualiza token de acesso
       tags:
       - auth
@@ -412,22 +412,22 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.RegisterInput'
+          $ref: '#/definitions/dto.RegisterInput'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/dto.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Registra um usuário
       tags:
       - auth
@@ -442,19 +442,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.PaginatedTransactionResponse'
+            $ref: '#/definitions/dto.PaginatedTransactionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Lista as transações
@@ -470,26 +470,26 @@ paths:
         name: transaction
         required: true
         schema:
-          $ref: '#/definitions/utils.TransactionCreateParam'
+          $ref: '#/definitions/dto.TransactionCreateParam'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/utils.TransactionCreateResponse'
+            $ref: '#/definitions/dto.TransactionCreateResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Cria uma transação
@@ -514,19 +514,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Deleta uma transação
@@ -548,19 +548,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.TransactionResponse'
+            $ref: '#/definitions/dto.TransactionResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Retorna uma transação
@@ -576,26 +576,26 @@ paths:
         name: transaction
         required: true
         schema:
-          $ref: '#/definitions/utils.TransactionUpdateParam'
+          $ref: '#/definitions/dto.TransactionUpdateParam'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.TransactionResponse'
+            $ref: '#/definitions/dto.TransactionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza uma transação
@@ -614,11 +614,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Deleta um usuário
@@ -634,15 +634,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.UserMeResponse'
+            $ref: '#/definitions/dto.UserMeResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Retorna dados do usuário
@@ -658,22 +658,22 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.UserUpdateParam'
+          $ref: '#/definitions/dto.UserUpdateParam'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.UserUpdateResponse'
+            $ref: '#/definitions/dto.UserUpdateResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza dados do usuário
@@ -690,22 +690,22 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/utils.BalanceUpdateParam'
+          $ref: '#/definitions/dto.BalanceUpdateParam'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.UserUpdateBalanceResponse'
+            $ref: '#/definitions/dto.UserUpdateBalanceResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza o saldo de um usuário
@@ -720,20 +720,20 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.UserChangePasswordParam'
+          $ref: '#/definitions/dto.UserChangePasswordParam'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.MessageResponse'
+            $ref: '#/definitions/dto.MessageResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualiza a senha do usuário

@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -22,9 +23,9 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.UserMeResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Success 200 {object} dto.UserMeResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me [get]
 func (h *UserHandler) Me(c *gin.Context) {
@@ -40,7 +41,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 		return
 	}
 
-	resp := utils.UserMeResponse{
+	resp := dto.UserMeResponse{
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -57,10 +58,10 @@ func (h *UserHandler) Me(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user body utils.UserUpdateParam true "Request body"
-// @Success 200 {object} utils.UserUpdateResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param user body dto.UserUpdateParam true "Request body"
+// @Success 200 {object} dto.UserUpdateResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me [put]
 func (h *UserHandler) Update(c *gin.Context) {
@@ -70,7 +71,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var input utils.UserUpdateInput
+	var input dto.UserUpdateInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -81,7 +82,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	resp := utils.UserUpdateResponse{
+	resp := dto.UserUpdateResponse{
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -97,10 +98,10 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param data body utils.BalanceUpdateParam true "Novo saldo"
-// @Success 200 {object} utils.UserUpdateBalanceResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param data body dto.BalanceUpdateParam true "Novo saldo"
+// @Success 200 {object} dto.UserUpdateBalanceResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me/balance [patch]
 func (h *UserHandler) UpdateBalance(c *gin.Context) {
@@ -110,7 +111,7 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 		return
 	}
 
-	var input utils.UserUpdateBalanceInput
+	var input dto.UserUpdateBalanceInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -120,7 +121,7 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.UserUpdateBalanceResponse(input))
+	c.JSON(http.StatusOK, dto.UserUpdateBalanceResponse(input))
 }
 
 // @BasePath /api/v1
@@ -130,8 +131,8 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 204
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /users/me [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
@@ -141,7 +142,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	var input utils.UserDeleteInput
+	var input dto.UserDeleteInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -158,10 +159,10 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Summary Atualiza a senha do usuário
 // @Description Atualiza a senha do usuário em questão
 // @Tags user
-// @Param user body utils.UserChangePasswordParam true "Request body"
-// @Success 200 {object} utils.MessageResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param user body dto.UserChangePasswordParam true "Request body"
+// @Success 200 {object} dto.MessageResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /users/password [put]
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
@@ -171,7 +172,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	var input utils.UserUpdatePasswordInput
+	var input dto.UserUpdatePasswordInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}

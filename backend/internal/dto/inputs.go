@@ -1,4 +1,4 @@
-package utils
+package dto
 
 type RegisterInput struct {
 	FirstName string `json:"first_name" binding:"required,min=2,max=50"`

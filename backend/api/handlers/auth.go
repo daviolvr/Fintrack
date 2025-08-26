@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 
@@ -23,13 +24,13 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param user body utils.RegisterInput true "Request Body with User data"
-// @Success 201 {object} utils.MessageResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param user body dto.RegisterInput true "Request Body with User data"
+// @Success 201 {object} dto.MessageResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
-	var input utils.RegisterInput
+	var input dto.RegisterInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -48,15 +49,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param user body utils.LoginInput true "Request body"
-// @Success 200 {object} utils.LoginResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param user body dto.LoginInput true "Request body"
+// @Success 200 {object} dto.LoginResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var input utils.LoginInput
+	var input dto.LoginInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -79,13 +80,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param refresh_token body utils.RefreshTokenInput true "Refresh Token"
-// @Success 200 {object} utils.RefreshTokenResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Param refresh_token body dto.RefreshTokenInput true "Refresh Token"
+// @Success 200 {object} dto.RefreshTokenResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Router /refresh [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	var input utils.RefreshTokenInput
+	var input dto.RefreshTokenInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}

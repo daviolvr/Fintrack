@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/auth"
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
@@ -21,7 +22,7 @@ func NewAuthService(db *sql.DB) *AuthService {
 	return &AuthService{DB: db}
 }
 
-func (s *AuthService) RegisterUser(input utils.RegisterInput) error {
+func (s *AuthService) RegisterUser(input dto.RegisterInput) error {
 	hashedPassword, err := utils.HashPassword(input.Password)
 	if err != nil {
 		return err
@@ -41,7 +42,7 @@ func (s *AuthService) RegisterUser(input utils.RegisterInput) error {
 	return repository.CreateUser(s.DB, &user)
 }
 
-func (s *AuthService) LoginUser(input utils.LoginInput) (string, string, error) {
+func (s *AuthService) LoginUser(input dto.LoginInput) (string, string, error) {
 	user, err := repository.FindUserByEmail(s.DB, input.Email)
 	if err != nil {
 		return "", "", errors.New("email ou senha incorretos")

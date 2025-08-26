@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -24,9 +25,9 @@ func NewCategoryHandler(service *services.CategoryService) *CategoryHandler {
 // @Accept json
 // @Produce json
 // @Param name path string true "Nome da categoria"
-// @Success 201 {object} utils.CategoryResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 501 {object} utils.ErrorResponse
+// @Success 201 {object} dto.CategoryResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 501 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /categories [post]
 func (h *CategoryHandler) Create(c *gin.Context) {
@@ -36,7 +37,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		return
 	}
 
-	var input utils.CategoryInput
+	var input dto.CategoryInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -47,7 +48,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		return
 	}
 
-	resp := utils.CategoryResponse{
+	resp := dto.CategoryResponse{
 		ID:   category.ID,
 		Name: category.Name,
 	}
@@ -61,9 +62,9 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 // @Tags category
 // @Accept json
 // @Produce json
-// @Success 200 {object} utils.PaginatedCategoriesResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Success 200 {object} dto.PaginatedCategoriesResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /categories [get]
 func (h *CategoryHandler) List(c *gin.Context) {
@@ -84,15 +85,15 @@ func (h *CategoryHandler) List(c *gin.Context) {
 		return
 	}
 
-	var respCategories []utils.CategoryResponse
+	var respCategories []dto.CategoryResponse
 	for _, cat := range categories {
-		respCategories = append(respCategories, utils.CategoryResponse{
+		respCategories = append(respCategories, dto.CategoryResponse{
 			ID:   cat.ID,
 			Name: cat.Name,
 		})
 	}
 
-	resp := utils.PaginatedCategoriesResponse{
+	resp := dto.PaginatedCategoriesResponse{
 		Data:       respCategories,
 		Total:      total,
 		Page:       page,
@@ -110,10 +111,10 @@ func (h *CategoryHandler) List(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID da categoria"
-// @Success 200 {object} utils.CategoryResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Success 200 {object} dto.CategoryResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /categories/{id} [put]
 func (h *CategoryHandler) Update(c *gin.Context) {
@@ -130,7 +131,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var input utils.CategoryInput
+	var input dto.CategoryInput
 	if !utils.BindJSON(c, &input) {
 		return
 	}
@@ -144,7 +145,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	resp := utils.CategoryResponse{
+	resp := dto.CategoryResponse{
 		ID:   category.ID,
 		Name: category.Name,
 	}
@@ -160,10 +161,10 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ID da categoria"
 // @Success 204
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security BearerAuth
 // @Router /categories/{id} [delete]
 func (h *CategoryHandler) Delete(c *gin.Context) {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/cache"
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 )
@@ -54,7 +55,7 @@ func (s *CategoryService) ListCategories(
 	cacheKey := fmt.Sprintf("categories:%d:%s:%d:%d", userID, search, page, limit)
 
 	// Verifica se existe no cache
-	var cached cache.CategoryCacheData
+	var cached dto.CategoryCacheData
 	found, err := s.cache.Get(cacheKey, &cached)
 	if err == nil && found {
 		fmt.Println("Pegando do cache:", cacheKey)
@@ -68,7 +69,7 @@ func (s *CategoryService) ListCategories(
 	}
 
 	// Salva no cache
-	if err := s.cache.Set(cacheKey, cache.CategoryCacheData{
+	if err := s.cache.Set(cacheKey, dto.CategoryCacheData{
 		Categories: categories,
 		Total:      total,
 	}, time.Minute*5); err != nil {

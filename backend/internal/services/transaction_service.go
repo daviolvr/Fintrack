@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/cache"
+	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
@@ -56,7 +57,7 @@ func (s *TransactionService) CreateTransaction(
 func (s *TransactionService) RetrieveTransaction(userID, transactionID uint) (*models.Transaction, error) {
 	cacheKey := fmt.Sprintf("transactions:user=%d:transaction=%d", userID, transactionID)
 
-	var cached cache.TransactionRetrieveCacheData
+	var cached dto.TransactionRetrieveCacheData
 	found, err := s.cache.Get(cacheKey, &cached)
 	if err == nil && found {
 		fmt.Println("Pegando do cache:", cacheKey)
@@ -72,7 +73,7 @@ func (s *TransactionService) RetrieveTransaction(userID, transactionID uint) (*m
 	}
 
 	// Salva no cache
-	if err := s.cache.Set(cacheKey, cache.TransactionRetrieveCacheData{
+	if err := s.cache.Set(cacheKey, dto.TransactionRetrieveCacheData{
 		Transaction: *tx,
 	}, time.Minute*2); err != nil {
 		fmt.Println("Erro ao salvar no cache:", err)
@@ -105,7 +106,7 @@ func (s *TransactionService) ListTransactions(
 	)
 
 	// Verifica se existe no cache
-	var cached cache.TransactionListCacheData
+	var cached dto.TransactionListCacheData
 	found, err := s.cache.Get(cacheKey, &cached)
 	if err == nil && found {
 		fmt.Println("Pegando do cache:", cacheKey)
@@ -129,7 +130,7 @@ func (s *TransactionService) ListTransactions(
 	}
 
 	// Salva no cache
-	if err := s.cache.Set(cacheKey, cache.TransactionListCacheData{
+	if err := s.cache.Set(cacheKey, dto.TransactionListCacheData{
 		Transactions: transactions,
 		Total:        total,
 	}, time.Minute*2); err != nil {
