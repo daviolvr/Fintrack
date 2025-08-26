@@ -17,7 +17,7 @@ func SetupRoutes(r *gin.Engine, db *sql.DB, cache *cache.Cache) {
 	authService := services.NewAuthService(db)
 	userService := services.NewUserService(db)
 	categoryService := services.NewCategoryService(db, cache)
-	transactionService := services.NewTransactionService(db)
+	transactionService := services.NewTransactionService(db, cache)
 
 	// Inicializa handlers
 	authHandler := handlers.NewAuthHandler(authService)

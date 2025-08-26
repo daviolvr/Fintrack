@@ -3,18 +3,22 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/daviolvr/Fintrack/internal/cache"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
+	"github.com/daviolvr/Fintrack/internal/utils"
 )
 
 type TransactionService struct {
-	DB *sql.DB
+	DB    *sql.DB
+	cache *cache.Cache
 }
 
-func NewTransactionService(db *sql.DB) *TransactionService {
-	return &TransactionService{DB: db}
+func NewTransactionService(db *sql.DB, cache *cache.Cache) *TransactionService {
+	return &TransactionService{DB: db, cache: cache}
 }
 
 // Cria uma transação
@@ -42,6 +46,9 @@ func (s *TransactionService) CreateTransaction(
 		return nil, err
 	}
 
+	// Invalida cache de transações do usuário
+	s.cache.InvalidateUserTransactions(userID)
+
 	return transaction, nil
 }
 
@@ -62,22 +69,55 @@ func (s *TransactionService) ListTransactions(
 	userID uint,
 	fromDate, toDate *time.Time,
 	categoryID *uint,
-	minAmoumt, maxAmount *float64,
+	minAmount, maxAmount *float64,
 	txType *string,
 	page, limit int,
 ) ([]models.Transaction, int, error) {
-	return repository.FindTransactionsByUser(
+	// Monta a chave do cache
+	cacheKey := fmt.Sprintf(
+		"transactions:user=%d:from=%s:to=%s:cat=%s:min=%s:max=%s:type=%s:page=%d:limit=%d",
+		userID,
+		utils.FormatTime(fromDate),
+		utils.FormatTime(toDate),
+		utils.FormatUint(categoryID),
+		utils.FormatFloat(minAmount),
+		utils.FormatFloat(maxAmount),
+		utils.FormatString(txType),
+		page,
+		limit,
+	)
+
+	// Verifica se existe no cache
+	var cached cache.TransactionCacheData
+	found, err := s.cache.Get(cacheKey, &cached)
+	if err == nil && found {
+		fmt.Println("Pegando do cache:", cacheKey)
+		return cached.Transactions, cached.Total, nil
+	}
+
+	transactions, total, err := repository.FindTransactionsByUser(
 		s.DB,
 		userID,
 		fromDate,
 		toDate,
 		categoryID,
-		minAmoumt,
+		minAmount,
 		maxAmount,
 		txType,
 		page,
 		limit,
 	)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Salva no cache
+	s.cache.Set(cacheKey, cache.TransactionCacheData{
+		Transactions: transactions,
+		Total:        total,
+	}, time.Minute*2)
+
+	return transactions, total, nil
 }
 
 // Atualiza transação
@@ -106,10 +146,21 @@ func (s *TransactionService) UpdateTransaction(
 		return nil, err
 	}
 
+	// Invalida cache de transações do usuário
+	s.cache.InvalidateUserTransactions(userID)
+
 	return tx, nil
 }
 
 // Deleta transação
 func (s *TransactionService) DeleteTransaction(userID, transactionID uint) error {
-	return repository.DeleteTransactionByUser(s.DB, userID, transactionID)
+	err := repository.DeleteTransactionByUser(s.DB, userID, transactionID)
+	if err != nil {
+		return err
+	}
+
+	// Invalida cache de transações do usuário
+	s.cache.InvalidateUserTransactions(userID)
+
+	return nil
 }

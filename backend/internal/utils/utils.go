@@ -3,10 +3,12 @@ package utils
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -95,4 +97,32 @@ func ValidateEmail(email string, allowedDomains []string) error {
 	}
 
 	return nil
+}
+
+func FormatTime(t *time.Time) string {
+	if t == nil {
+		return "nil"
+	}
+	return t.Format("2006-01-02")
+}
+
+func FormatUint(u *uint) string {
+	if u == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%d", *u)
+}
+
+func FormatFloat(f *float64) string {
+	if f == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%.2f", *f)
+}
+
+func FormatString(s *string) string {
+	if s == nil {
+		return "nil"
+	}
+	return *s
 }
