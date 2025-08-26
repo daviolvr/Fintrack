@@ -15,7 +15,7 @@ import (
 func SetupRoutes(r *gin.Engine, db *sql.DB, cache *cache.Cache) {
 	// Inicializa serviços
 	authService := services.NewAuthService(db)
-	userService := services.NewUserService(db)
+	userService := services.NewUserService(db, cache)
 	categoryService := services.NewCategoryService(db, cache)
 	transactionService := services.NewTransactionService(db, cache)
 

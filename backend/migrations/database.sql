@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     balance NUMERIC(15,2) NOT NULL DEFAULT 0.00,
     failed_logins INT NOT NULL DEFAULT 0,
-    locked_until TIMESTAMP WITH TIME ZONE;
+    locked_until TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE SET NULL,
+    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
     type VARCHAR(10) NOT NULL CHECK (type IN ('income', 'expense')),
     amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
     description TEXT,

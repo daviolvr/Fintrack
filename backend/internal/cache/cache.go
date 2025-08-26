@@ -53,9 +53,8 @@ func (c *Cache) Get(key string, dest any) (bool, error) {
 	return true, nil
 }
 
-func (c *Cache) InvalidateUserCategories(userID uint) error {
-	pattern := fmt.Sprintf("categories:%d:*", userID)
-	iter := c.client.Scan(c.ctx, 0, pattern, 0).Iterator()
+func (c *Cache) DeleteByPrefix(prefix string) error {
+	iter := c.client.Scan(c.ctx, 0, prefix, 0).Iterator()
 	for iter.Next(c.ctx) {
 		if err := c.client.Del(c.ctx, iter.Val()).Err(); err != nil {
 			return err
@@ -64,13 +63,14 @@ func (c *Cache) InvalidateUserCategories(userID uint) error {
 	return iter.Err()
 }
 
+func (c *Cache) InvalidateUserCategories(userID uint) error {
+	return c.DeleteByPrefix(fmt.Sprintf("categories:%d:*", userID))
+}
+
 func (c *Cache) InvalidateUserTransactions(userID uint) error {
-	pattern := fmt.Sprintf("transactions:%d:*", userID)
-	iter := c.client.Scan(c.ctx, 0, pattern, 0).Iterator()
-	for iter.Next(c.ctx) {
-		if err := c.client.Del(c.ctx, iter.Val()).Err(); err != nil {
-			return err
-		}
-	}
-	return iter.Err()
+	return c.DeleteByPrefix(fmt.Sprintf("transactions:%d:*", userID))
+}
+
+func (c *Cache) InvalidateUserData(userID uint) error {
+	return c.DeleteByPrefix(fmt.Sprintf("user:%d:*", userID))
 }

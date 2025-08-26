@@ -3,24 +3,46 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
+	"github.com/daviolvr/Fintrack/internal/cache"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
 )
 
 type UserService struct {
-	DB *sql.DB
+	DB    *sql.DB
+	cache *cache.Cache
 }
 
 // Construtor
-func NewUserService(db *sql.DB) *UserService {
-	return &UserService{DB: db}
+func NewUserService(db *sql.DB, cache *cache.Cache) *UserService {
+	return &UserService{DB: db, cache: cache}
 }
 
 // Retorna o usuário
 func (s *UserService) GetUser(userID uint) (*models.User, error) {
-	return repository.FindUserByID(s.DB, userID)
+	cacheKey := fmt.Sprintf("user:%d:data", userID)
+
+	var user models.User
+	found, err := s.cache.Get(cacheKey, &user)
+	if err == nil && found {
+		fmt.Println("Pegando do cache:", cacheKey)
+		return &user, nil
+	}
+
+	userPtr, err := repository.FindUserByID(s.DB, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if userPtr != nil {
+		_ = s.cache.Set(cacheKey, userPtr, time.Minute*10)
+	}
+
+	return userPtr, nil
 }
 
 // Atualiza dados do usuário
@@ -39,6 +61,8 @@ func (s *UserService) UpdateUser(
 		return nil, err
 	}
 
+	// Invalid o cache do user
+	_ = s.cache.InvalidateUserData(userID)
 	return s.GetUser(userID)
 }
 
@@ -48,7 +72,10 @@ func (s *UserService) UpdateBalance(userID uint, balance float64) error {
 		ID:      userID,
 		Balance: balance,
 	}
-	return repository.UpdateUserBalance(s.DB, &user)
+	if err := repository.UpdateUserBalance(s.DB, &user); err != nil {
+		return err
+	}
+	return s.cache.InvalidateUserData(userID)
 }
 
 // Deleta usuário
@@ -62,7 +89,11 @@ func (s *UserService) DeleteUser(userID uint, password string) error {
 		return errors.New("senha incorreta")
 	}
 
-	return repository.DeleteUser(s.DB, userID)
+	if err := repository.DeleteUser(s.DB, userID); err != nil {
+		return err
+	}
+
+	return s.cache.InvalidateUserData(userID)
 }
 
 // Atualiza senha
@@ -89,5 +120,9 @@ func (s *UserService) UpdatePassword(
 		Password: hashedPassword,
 	}
 
-	return repository.UpdatePassword(s.DB, &updatedUser)
+	if err := repository.UpdatePassword(s.DB, &updatedUser); err != nil {
+		return err
+	}
+
+	return s.cache.InvalidateUserData(userID)
 }
