@@ -3,19 +3,30 @@ services:
     container_name: fintrack-backend
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     env_file: 
-      - ./.env
+      - ./.env.docker
     depends_on:
       postgres:
         condition: service_healthy
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: fintrack-redis
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis-data:/data
+      - ./backend/docker/redis.conf:/usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
   postgres:
     image: postgres:17
     env_file:
-      - ./.env
+      - ./.env.docker
     restart: "always"
     environment:
       TZ: "America/Sao_Paulo"
@@ -31,3 +42,4 @@ services:
 
 volumes:
   postgres_data:
+  redis-data:
