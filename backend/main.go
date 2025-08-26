@@ -7,6 +7,7 @@ import (
 	"github.com/daviolvr/Fintrack/api/middlewares"
 	"github.com/daviolvr/Fintrack/api/router"
 	"github.com/daviolvr/Fintrack/docs"
+	"github.com/daviolvr/Fintrack/internal/cache"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -32,8 +33,11 @@ func main() {
 	// Middleware CORS global
 	r.Use(middlewares.CORS())
 
+	// Inicializa cache
+	cache := cache.NewCache()
+
 	// Seta as rotas
-	router.SetupRoutes(r, db)
+	router.SetupRoutes(r, db, cache)
 
 	// Configuraçẽos do Swagger
 	docs.SwaggerInfo.Title = "Fintrack API"

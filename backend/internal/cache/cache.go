@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -28,10 +29,26 @@ func NewCache() *Cache {
 	}
 }
 
-func (c *Cache) Set(key string, value string, ttl time.Duration) error {
-	return c.client.Set(c.ctx, key, value, ttl).Err()
+func (c *Cache) Set(key string, value any, ttl time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return c.client.Set(c.ctx, key, data, ttl).Err()
 }
 
-func (c *Cache) Get(key string) (string, error) {
-	return c.client.Get(c.ctx, key).Result()
+func (c *Cache) Get(key string, dest any) (bool, error) {
+	data, err := c.client.Get(c.ctx, key).Result()
+	if err == redis.Nil {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	if err := json.Unmarshal([]byte(data), dest); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

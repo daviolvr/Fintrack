@@ -2,19 +2,23 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"math"
+	"time"
 
+	"github.com/daviolvr/Fintrack/internal/cache"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 )
 
 type CategoryService struct {
-	DB *sql.DB
+	DB    *sql.DB
+	cache *cache.Cache
 }
 
 // Construtor
-func NewCategoryService(db *sql.DB) *CategoryService {
-	return &CategoryService{DB: db}
+func NewCategoryService(db *sql.DB, cache *cache.Cache) *CategoryService {
+	return &CategoryService{DB: db, cache: cache}
 }
 
 // Cria uma categoria
@@ -41,10 +45,29 @@ func (s *CategoryService) ListCategories(
 	if limit < 1 || limit > 100 {
 		limit = 10
 	}
+
+	// Monta a chave do cache
+	cacheKey := fmt.Sprintf("categories:%d:%s:%d:%d", userID, search, page, limit)
+
+	// Verifica se existe no cache
+	var cached cache.CategoryCacheData
+	found, err := s.cache.Get(cacheKey, &cached)
+	if err == nil && found {
+		return cached.Categories, cached.Total, nil
+	}
+
+	// Busca no banco
 	categories, total, err := repository.FindCategoriesByUser(s.DB, userID, search, page, limit)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	// Salva no cache
+	s.cache.Set(cacheKey, cache.CategoryCacheData{
+		Categories: categories,
+		Total:      total,
+	}, time.Minute*5)
+
 	return categories, total, nil
 }
 

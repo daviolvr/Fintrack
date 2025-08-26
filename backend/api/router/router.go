@@ -5,17 +5,18 @@ import (
 
 	"github.com/daviolvr/Fintrack/api/handlers"
 	"github.com/daviolvr/Fintrack/api/middlewares"
+	"github.com/daviolvr/Fintrack/internal/cache"
 	"github.com/daviolvr/Fintrack/internal/services"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRoutes(r *gin.Engine, db *sql.DB) {
+func SetupRoutes(r *gin.Engine, db *sql.DB, cache *cache.Cache) {
 	// Inicializa serviços
 	authService := services.NewAuthService(db)
 	userService := services.NewUserService(db)
-	categoryService := services.NewCategoryService(db)
+	categoryService := services.NewCategoryService(db, cache)
 	transactionService := services.NewTransactionService(db)
 
 	// Inicializa handlers
