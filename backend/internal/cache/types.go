@@ -9,7 +9,11 @@ type CategoryCacheData struct {
 	Total      int
 }
 
-type TransactionCacheData struct {
+type TransactionRetrieveCacheData struct {
+	Transaction models.Transaction
+}
+
+type TransactionListCacheData struct {
 	Transactions []models.Transaction
 	Total        int
 }

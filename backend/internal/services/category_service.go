@@ -68,10 +68,12 @@ func (s *CategoryService) ListCategories(
 	}
 
 	// Salva no cache
-	s.cache.Set(cacheKey, cache.CategoryCacheData{
+	if err := s.cache.Set(cacheKey, cache.CategoryCacheData{
 		Categories: categories,
 		Total:      total,
-	}, time.Minute*5)
+	}, time.Minute*5); err != nil {
+		fmt.Println("Erro ao salvar no cache:", err)
+	}
 
 	return categories, total, nil
 }

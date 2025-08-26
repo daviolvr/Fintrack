@@ -39,7 +39,9 @@ func (s *UserService) GetUser(userID uint) (*models.User, error) {
 	}
 
 	if userPtr != nil {
-		_ = s.cache.Set(cacheKey, userPtr, time.Minute*10)
+		if err = s.cache.Set(cacheKey, userPtr, time.Minute*10); err != nil {
+			fmt.Println("Erro ao salvar no cache:", err)
+		}
 	}
 
 	return userPtr, nil

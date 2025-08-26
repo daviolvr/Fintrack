@@ -54,6 +54,15 @@ func (s *TransactionService) CreateTransaction(
 
 // Recupera uma transação
 func (s *TransactionService) RetrieveTransaction(userID, transactionID uint) (*models.Transaction, error) {
+	cacheKey := fmt.Sprintf("transactions:user=%d:transaction=%d", userID, transactionID)
+
+	var cached cache.TransactionRetrieveCacheData
+	found, err := s.cache.Get(cacheKey, &cached)
+	if err == nil && found {
+		fmt.Println("Pegando do cache:", cacheKey)
+		return &cached.Transaction, nil
+	}
+
 	tx, err := repository.RetrieveTransactionByIDAndUserID(s.DB, userID, transactionID)
 	if err != nil {
 		return nil, err
@@ -61,6 +70,14 @@ func (s *TransactionService) RetrieveTransaction(userID, transactionID uint) (*m
 	if tx == nil {
 		return nil, errors.New("transação não encontrada")
 	}
+
+	// Salva no cache
+	if err := s.cache.Set(cacheKey, cache.TransactionRetrieveCacheData{
+		Transaction: *tx,
+	}, time.Minute*2); err != nil {
+		fmt.Println("Erro ao salvar no cache:", err)
+	}
+
 	return tx, nil
 }
 
@@ -88,7 +105,7 @@ func (s *TransactionService) ListTransactions(
 	)
 
 	// Verifica se existe no cache
-	var cached cache.TransactionCacheData
+	var cached cache.TransactionListCacheData
 	found, err := s.cache.Get(cacheKey, &cached)
 	if err == nil && found {
 		fmt.Println("Pegando do cache:", cacheKey)
@@ -112,10 +129,12 @@ func (s *TransactionService) ListTransactions(
 	}
 
 	// Salva no cache
-	s.cache.Set(cacheKey, cache.TransactionCacheData{
+	if err := s.cache.Set(cacheKey, cache.TransactionListCacheData{
 		Transactions: transactions,
 		Total:        total,
-	}, time.Minute*2)
+	}, time.Minute*2); err != nil {
+		fmt.Println("Erro ao salvar no cache:", err)
+	}
 
 	return transactions, total, nil
 }
