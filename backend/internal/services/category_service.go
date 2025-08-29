@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 	"math"
 	"time"
@@ -10,15 +9,16 @@ import (
 	"github.com/daviolvr/Fintrack/internal/dto"
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
+	"gorm.io/gorm"
 )
 
 type CategoryService struct {
-	DB    *sql.DB
+	DB    *gorm.DB
 	cache *cache.Cache
 }
 
 // Construtor
-func NewCategoryService(db *sql.DB, cache *cache.Cache) *CategoryService {
+func NewCategoryService(db *gorm.DB, cache *cache.Cache) *CategoryService {
 	return &CategoryService{DB: db, cache: cache}
 }
 
