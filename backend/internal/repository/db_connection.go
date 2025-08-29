@@ -1,15 +1,15 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func ConnectToDB() (*sql.DB, error) {
+func ConnectToDB() (*gorm.DB, error) {
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
 	user := os.Getenv("POSTGRES_USER")
@@ -17,20 +17,13 @@ func ConnectToDB() (*sql.DB, error) {
 	dbname := os.Getenv("POSTGRES_DB")
 
 	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=America/Fortaleza",
 		host, port, user, password, dbname,
 	)
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
-		log.Printf("Erro ao abrir conexão com o banco: %v", err)
-		return nil, fmt.Errorf("erro ao abrir conexão com o banco: %w", err)
-	}
-
-	// Testa conexão real com o banco
-	if err := db.Ping(); err != nil {
-		log.Printf("Erro ao conectar ao banco: %v", err)
-		return nil, fmt.Errorf("erro ao conectar ao banco: %w", err)
+		panic("falha ao conectar ao banco")
 	}
 
 	return db, nil

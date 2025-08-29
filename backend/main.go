@@ -25,7 +25,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Erro ao conectar : %v", err)
 	}
-	defer db.Close()
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("Erro ao pegar conex'ao subjacente: %v", err)
+	}
+	defer sqlDB.Close()
 
 	// Utiliza o engine do Gin
 	r := gin.Default()

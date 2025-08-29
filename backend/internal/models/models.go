@@ -5,33 +5,36 @@ import (
 )
 
 type User struct {
-	ID           uint       `json:"id" db:"id"`
-	FirstName    string     `json:"first_name" db:"first_name"`
-	LastName     string     `json:"last_name" db:"last_name"`
-	Email        string     `json:"email" db:"email"`
-	Password     string     `json:"-" db:"password_hash"`
-	Balance      float64    `json:"balance" db:"balance"`
-	FailedLogins uint       `json:"failed_logins" db:"failed_logins"`
-	LockedUntil  *time.Time `json:"locked_until,omitempty" db:"locked_until"`
-	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
+	ID           uint       `gorm:"primaryKey"`
+	FirstName    string     `gorm:"not null;size:100" json:"first_name"`
+	LastName     string     `gorm:"not null;size:100" json:"last_name"`
+	Email        string     `gorm:"unique;not null;size:100" json:"email"`
+	Password     string     `gorm:"not null;size:255" json:"-"`
+	Balance      float64    `gorm:"default:0" json:"balance"`
+	FailedLogins uint       `gorm:"default:0" json:"failed_logins"`
+	LockedUntil  *time.Time `json:"locked_until,omitempty"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 // Categoria da transação (ex: Alimentação, Transporte)
 type Category struct {
-	ID     uint   `json:"id" db:"id"`
-	UserID uint   `json:"user_id" db:"user_id"` // Categoria pode ser custom do Usuário
-	Name   string `json:"name" db:"name"`
+	ID     uint   `gorm:"primaryKey"`
+	UserID uint   `gorm:"not null" json:"user_id"`
+	User   User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user"`
+	Name   string `gorm:"not null;size:50" json:"name"`
 }
 
 type Transaction struct {
-	ID          uint      `json:"id" db:"id"`
-	UserID      uint      `json:"user_id" db:"user_id"`
-	CategoryID  uint      `json:"category_id" db:"category_id"`
-	Type        string    `json:"type" db:"type"` // "income" ou "expense"
-	Amount      float64   `json:"amount" db:"amount"`
-	Description string    `json:"description,omitempty" db:"description"`
-	Date        time.Time `json:"date" db:"date"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ID          uint      `gorm:"primaryKey"`
+	UserID      uint      `gorm:"not null" json:"user_id"`
+	User        User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user"`
+	CategoryID  uint      `gorm:"not null" json:"category_id"`
+	Category    Category  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"category"`
+	Type        string    `gorm:"not null;size:20" json:"type"` // "income" ou "expense"
+	Amount      float64   `gorm:"not null" json:"amount"`
+	Description string    `gorm:"size:255" json:"description"`
+	Date        time.Time `gorm:"not null" json:"date"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
