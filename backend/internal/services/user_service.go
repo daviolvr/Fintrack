@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -11,15 +10,16 @@ import (
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
+	"gorm.io/gorm"
 )
 
 type UserService struct {
-	DB    *sql.DB
+	DB    *gorm.DB
 	cache *cache.Cache
 }
 
 // Construtor
-func NewUserService(db *sql.DB, cache *cache.Cache) *UserService {
+func NewUserService(db *gorm.DB, cache *cache.Cache) *UserService {
 	return &UserService{DB: db, cache: cache}
 }
 

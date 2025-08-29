@@ -1,111 +1,63 @@
 package repository
 
 import (
-	"database/sql"
+	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/models"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Cria transação
-func CreateTransaction(db *sql.DB, t *models.Transaction) error {
-	// Começa a transação
-	sqlTx, err := db.Begin()
-	if err != nil {
-		return err
-	}
+func CreateTransaction(db *gorm.DB, t *models.Transaction) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		var user models.User
 
-	// Pega saldo atual do usuário
-	var currentBalance float64
-	err = sqlTx.QueryRow(`
-		SELECT balance
-		FROM users
-		WHERE id = $1
-		FOR UPDATE
-	`, t.UserID).Scan(&currentBalance)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Bloqueia a linha do usuário para atualizar saldo
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&user, t.UserID).Error; err != nil {
+			return err
+		}
 
-	// Se for despesa e não tiver asldo suficiente, bloqueia
-	if t.Type == "expense" && currentBalance < t.Amount {
-		sqlTx.Rollback()
-		return fmt.Errorf("saldo insuficiente")
-	}
+		// Checa saldo se for despesa
+		if t.Type == "expense" && user.Balance < t.Amount {
+			return fmt.Errorf("saldo insuficiente")
+		}
 
-	// Insere a transação
-	query := `
-		INSERT INTO transactions (user_id, category_id, type, amount, description, date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-		RETURNING id
-	`
+		// Insere a transação
+		if err := tx.Create(t).Error; err != nil {
+			return err
+		}
 
-	err = sqlTx.QueryRow(
-		query,
-		t.UserID,
-		t.CategoryID,
-		t.Type,
-		t.Amount,
-		t.Description,
-		t.Date,
-	).Scan(&t.ID)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Atualiza saldo
+		balanceChange := t.Amount
+		if t.Type == "expense" {
+			balanceChange = -t.Amount
+		}
 
-	// Atualiza o saldo
-	var balanceChange float64
-	if t.Type == "income" {
-		balanceChange = t.Amount
-	} else {
-		balanceChange = -t.Amount
-	}
+		if err := tx.Model(&user).
+			Update("balance", gorm.Expr("balance + ?", balanceChange)).Error; err != nil {
+			return err
+		}
 
-	_, err = sqlTx.Exec(`
-		UPDATE users
-		SET balance = balance + $1, updated_at = NOW()
-		WHERE id = $2
-	`, balanceChange, t.UserID)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
-
-	// Confirma a transação
-	return sqlTx.Commit()
+		return nil
+	})
 }
 
 // Busca uma única transação do usuário
 func RetrieveTransactionByIDAndUserID(
-	db *sql.DB,
+	db *gorm.DB,
 	userID, transactionID uint,
 ) (*models.Transaction, error) {
-	query := `
-		SELECT id, user_id, category_id, type, amount, description, date, created_at, updated_at
-		FROM transactions
-		WHERE id = $1 AND user_id = $2
-	`
-
-	row := db.QueryRow(query, transactionID, userID)
-
 	var transaction models.Transaction
-	err := row.Scan(
-		&transaction.ID,
-		&transaction.UserID,
-		&transaction.CategoryID,
-		&transaction.Type,
-		&transaction.Amount,
-		&transaction.Description,
-		&transaction.Date,
-		&transaction.CreatedAt,
-		&transaction.UpdatedAt,
-	)
+
+	err := db.Where("id = ? AND user_id = ?", transactionID, userID).
+		First(&transaction).Error
+
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -116,7 +68,7 @@ func RetrieveTransactionByIDAndUserID(
 
 // Busca transação com filtros opcionais
 func FindTransactionsByUser(
-	db *sql.DB,
+	db *gorm.DB,
 	userID uint,
 	fromDate, toDate *time.Time,
 	categoryID *uint,
@@ -124,252 +76,158 @@ func FindTransactionsByUser(
 	txType *string,
 	page, limit int,
 ) ([]models.Transaction, int, error) {
-
-	args := []any{userID}
-	argIndex := 2
-
-	query := `
-		SELECT id, user_id, category_id, type, amount, description, date, created_at, updated_at
-		FROM transactions
-		WHERE user_id = $1
-	`
-
-	if fromDate != nil {
-		query += ` AND date >= $` + strconv.Itoa(argIndex)
-		args = append(args, *fromDate)
-		argIndex++
+	if page < 1 {
+		page = 1
 	}
-
-	if toDate != nil {
-		query += ` AND date <= $` + strconv.Itoa(argIndex)
-		args = append(args, *toDate)
-		argIndex++
+	if limit < 1 || limit > 100 {
+		limit = 10
 	}
-
-	if categoryID != nil {
-		query += ` AND category_id = $` + strconv.Itoa(argIndex)
-		args = append(args, *categoryID)
-		argIndex++
-	}
-
-	if minAmount != nil {
-		query += " AND amount >= $" + strconv.Itoa(argIndex)
-		args = append(args, *minAmount)
-		argIndex++
-	}
-
-	if maxAmount != nil {
-		query += " AND amount <= $" + strconv.Itoa(argIndex)
-		args = append(args, *maxAmount)
-		argIndex++
-	}
-
-	if txType != nil {
-		query += " AND type = $" + strconv.Itoa(argIndex)
-		args = append(args, *txType)
-		argIndex++
-	}
-
-	// Ordena por mais recentes
-	query += ` ORDER BY date desc`
-
-	// Contagem total
-	var total int
-	countQuery := "SELECT COUNT(*) FROM (" + query + ") AS count_sub"
-	if err := db.QueryRow(countQuery, args...).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-
-	// Paginação
-	offset := (page - 1) * limit
-	query += ` LIMIT $` + strconv.Itoa(argIndex) + ` OFFSET $` + strconv.Itoa(argIndex+1)
-	args = append(args, limit, offset)
-
-	rows, err := db.Query(query, args...)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
 
 	var transactions []models.Transaction
-	for rows.Next() {
-		var t models.Transaction
-		if err := rows.Scan(
-			&t.ID,
-			&t.UserID,
-			&t.CategoryID,
-			&t.Type,
-			&t.Amount,
-			&t.Description,
-			&t.Date,
-			&t.CreatedAt,
-			&t.UpdatedAt,
-		); err != nil {
-			return nil, 0, err
-		}
-		transactions = append(transactions, t)
+	var total int64
+
+	// Monta a query base
+	query := db.Model(&models.Transaction{}).Where("user_id = ?", userID)
+
+	// Filtros opcionais
+	if fromDate != nil {
+		query = query.Where("date >= ?", *fromDate)
+	}
+	if toDate != nil {
+		query = query.Where("date <= ?", *toDate)
+	}
+	if categoryID != nil {
+		query = query.Where("category_id = ?", *categoryID)
+	}
+	if minAmount != nil {
+		query = query.Where("amount >= ?", *minAmount)
+	}
+	if maxAmount != nil {
+		query = query.Where("amount >= ?", *minAmount)
+	}
+	if txType != nil {
+		query = query.Where("type = ?", *txType)
 	}
 
-	return transactions, total, nil
+	// Contagem total
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Paginação e ordenação
+	offset := (page - 1) * limit
+	if err := query.Order("date desc").Limit(limit).Offset(offset).Find(&transactions).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return transactions, int(total), nil
 }
 
 // Atualiza uma transação pertencente a um usuário
-func UpdateTransaction(db *sql.DB, t *models.Transaction) error {
-	// Começa a transação
-	sqlTx, err := db.Begin()
-	if err != nil {
-		return err
-	}
+func UpdateTransaction(db *gorm.DB, t *models.Transaction) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		var oldTx models.Transaction
+		var user models.User
 
-	// Pega a transação atual para saber o saldo antigo
-	var oldAmount float64
-	var oldType string
-	err = sqlTx.QueryRow(`
-		SELECT amount, type
-		FROM transactions
-		WHERE id = $1 AND user_id = $2
-		FOR UPDATE
-	`, t.ID, t.UserID).Scan(&oldAmount, &oldType)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Bloqueia a transação antiga para obter amount e type
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ? AND user_id = ?", t.ID, t.UserID).
+			First(&oldTx).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return gorm.ErrRecordNotFound
+			}
+			return err
+		}
 
-	// Atualiza a transação
-	query := `
-		UPDATE transactions
-		SET category_id = $1,
-		    type = $2,
-		    amount = $3,
-		    description = $4,
-		    date = $5,
-		    updated_at = NOW()
-		WHERE id = $6 AND user_id = $7
-	`
+		// Bloqueia a linha do usuário para atualizar saldo
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&user, t.UserID).Error; err != nil {
+			return err
+		}
 
-	result, err := sqlTx.Exec(query,
-		t.CategoryID,
-		t.Type,
-		t.Amount,
-		t.Description,
-		t.Date,
-		t.ID,
-		t.UserID,
-	)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Remove efeito antigo da transação
+		if oldTx.Type == "income" {
+			user.Balance -= oldTx.Amount
+		} else {
+			user.Balance += oldTx.Amount
+		}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
-	if rowsAffected == 0 {
-		sqlTx.Rollback()
-		return sql.ErrNoRows
-	}
+		// Aplica novo valor da transação
+		if t.Type == "income" {
+			user.Balance += t.Amount
+		} else {
+			user.Balance -= t.Amount
+		}
 
-	// Pega saldo atual do usuário
-	var currentBalance float64
-	err = sqlTx.QueryRow(`
-		SELECT balance
-		FROM users
-		WHERE id = $1 FOR UPDATE
-	`, t.UserID).Scan(&currentBalance)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Checa saldo negativo
+		if user.Balance < 0 {
+			return fmt.Errorf("saldo insuficiente")
+		}
 
-	// Remove efeito antigo da transação
-	if oldType == "income" {
-		currentBalance -= oldAmount
-	} else {
-		currentBalance += oldAmount
-	}
+		// Atualiza a transação
+		if err := tx.Model(&oldTx).Updates(models.Transaction{
+			CategoryID:  t.CategoryID,
+			Type:        t.Type,
+			Amount:      t.Amount,
+			Description: t.Description,
+			Date:        t.Date,
+		}).Error; err != nil {
+			return err
+		}
 
-	// Aplica novo valor da transação
-	if t.Type == "income" {
-		currentBalance += t.Amount
-	} else {
-		currentBalance -= t.Amount
-	}
+		// Atualiza saldo do usuário
+		if err := tx.Model(&user).Update("balance", user.Balance).Error; err != nil {
+			return err
+		}
 
-	// Checa saldo negativo
-	if currentBalance < 0 {
-		sqlTx.Rollback()
-		return fmt.Errorf("saldo insuficiente")
-	}
-
-	// Atualiza saldo no banco
-	_, err = sqlTx.Exec(`
-		UPDATE users
-		SET balance = $1, updated_at = NOW()
-		WHERE id = $2
-	`, currentBalance, t.UserID)
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
-
-	// Commit da transação
-	return sqlTx.Commit()
+		return nil
+	})
 }
 
 // Deleta uma transação pelo ID e pelo userID
-func DeleteTransactionByUser(db *sql.DB, userID uint, transactionID uint) error {
-	sqlTx, err := db.Begin()
-	if err != nil {
-		return err
-	}
+func DeleteTransactionByUser(db *gorm.DB, userID uint, transactionID uint) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		var transaction models.Transaction
+		var user models.User
 
-	// Pega a transação pra saber o valor
-	var amount float64
-	var txType string
-	err = sqlTx.QueryRow(`
-		SELECT amount, type
-		FROM transactions
-		WHERE id = $1 AND user_id = $2
-	`, transactionID, userID).Scan(&amount, &txType)
+		// Bloqueia a transação para pegar amount e type
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ? AND user_id = ?", transactionID, userID).
+			First(&transaction).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return gorm.ErrRecordNotFound
+			}
+			return err
+		}
 
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Bloqueia linha do usuário
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&user, userID).Error; err != nil {
+			return err
+		}
 
-	// Deleta a transação
-	result, err := sqlTx.Exec(`
-		DELETE FROM transactions
-		WHERE id = $1 AND user_id = $2
-	`, transactionID, userID)
+		// Remove efeito da transação do saldo
+		if transaction.Type == "income" {
+			user.Balance -= transaction.Amount
+		} else {
+			user.Balance += transaction.Amount
+		}
 
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Checa saldo negativo (opcional)
+		if user.Balance < 0 {
+			return fmt.Errorf("saldo insuficiente")
+		}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		sqlTx.Rollback()
-		return err
-	}
+		// Deleta a transação
+		if err := tx.Delete(&transaction).Error; err != nil {
+			return err
+		}
 
-	if rowsAffected == 0 {
-		sqlTx.Rollback()
-		return sql.ErrNoRows
-	}
+		// Atualiza saldo do usuário
+		if err := tx.Model(&user).Update("balance", user.Balance).Error; err != nil {
+			return err
+		}
 
-	// Atualiza saldo do usuário de acordo com tipo de transação deletada
-	if txType == "income" {
-		_, err = sqlTx.Exec(`UPDATE users SET balance = balance - $1 WHERE id = $2`, amount, userID)
-	} else {
-		_, err = sqlTx.Exec(`UPDATE users SET balance = balance + $1 WHERE id = $2`, amount, userID)
-	}
-	if err != nil {
-		sqlTx.Rollback()
-	}
-
-	return sqlTx.Commit()
+		return nil
+	})
 }

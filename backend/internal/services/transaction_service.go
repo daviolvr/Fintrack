@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -11,14 +10,15 @@ import (
 	"github.com/daviolvr/Fintrack/internal/models"
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
+	"gorm.io/gorm"
 )
 
 type TransactionService struct {
-	DB    *sql.DB
+	DB    *gorm.DB
 	cache *cache.Cache
 }
 
-func NewTransactionService(db *sql.DB, cache *cache.Cache) *TransactionService {
+func NewTransactionService(db *gorm.DB, cache *cache.Cache) *TransactionService {
 	return &TransactionService{DB: db, cache: cache}
 }
 
