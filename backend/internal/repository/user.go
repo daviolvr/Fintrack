@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/daviolvr/Fintrack/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Cria usuário
@@ -32,27 +32,14 @@ func FindUserByEmail(db *gorm.DB, email string) (*models.User, error) {
 }
 
 // Busca usuário pelo ID
-func FindUserByID(db *sql.DB, id uint) (*models.User, error) {
-	query := `
-		SELECT id, first_name, last_name, email, password_hash, balance, created_at, updated_at
-		FROM users 
-		WHERE id = $1
-	`
-
-	row := db.QueryRow(query, id)
-
+func FindUserByID(db *gorm.DB, id uint) (*models.User, error) {
 	var user models.User
-	err := row.Scan(
-		&user.ID,
-		&user.FirstName,
-		&user.LastName,
-		&user.Email,
-		&user.Password,
-		&user.Balance,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
+
+	err := db.First(&user, id).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil // mantém o comportamento de não encontrado
+		}
 		return nil, err
 	}
 
@@ -60,52 +47,79 @@ func FindUserByID(db *sql.DB, id uint) (*models.User, error) {
 }
 
 // Atualiza os dados do usuário
-func UpdateUser(db *sql.DB, user *models.User) error {
-	query := `
-		UPDATE users SET first_name = $1, last_name = $2, email = $3, updated_at = NOW()
-		WHERE id = $4
-	`
-	_, err := db.Exec(query, user.FirstName, user.LastName, user.Email, user.ID)
-	return err
+func UpdateUser(db *gorm.DB, user *models.User) error {
+	result := db.Model(&models.User{}).
+		Where("id = ?", user.ID).
+		Updates(map[string]interface{}{
+			"first_name": user.FirstName,
+			"last_name":  user.LastName,
+			"email":      user.Email,
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
 // Atualiza o saldo da conta do usuário
-func UpdateUserBalance(db *sql.DB, user *models.User) error {
-	query := `
-		UPDATE users SET balance = $1
-		WHERE id = $2
-	`
+func UpdateUserBalance(db *gorm.DB, user *models.User) error {
+	result := db.Model(&models.User{}).
+		Where("id = ?", user.ID).
+		Update("balance", user.Balance)
 
-	_, err := db.Exec(query, user.Balance, user.ID)
-	return err
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
 // Deleta o usuário
-func DeleteUser(db *sql.DB, id uint) error {
-	query := `
-		DELETE from users
-		WHERE id = $1
-	`
-	_, err := db.Exec(query, id)
-	return err
+func DeleteUser(db *gorm.DB, id uint) error {
+	result := db.Delete(&models.User{}, id)
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
 // Atualiza a senha do usuário
-func UpdatePassword(db *sql.DB, user *models.User) error {
-	query := `
-		UPDATE users SET password_hash = $1, updated_at = NOW()
-		WHERE id = $2
-	`
-	_, err := db.Exec(query, user.Password, user.ID)
-	return err
+func UpdatePassword(db *gorm.DB, user *models.User) error {
+	result := db.Model(&models.User{}).
+		Where("id = ?", user.ID).
+		Update("password_hash", user.Password)
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }
 
 // Incrementa as falhas de login e retorna o total atualizado
 func IncrementFailedLogin(db *gorm.DB, userID uint) (int64, error) {
 	var user models.User
 
-	result := db.Model(&models.User{}).
+	// Incrementa e retorna a nova contagem de failed_logins
+	result := db.Model(&user).
 		Where("id = ?", userID).
+		Clauses(clause.Returning{Columns: []clause.Column{{Name: "failed_logins"}}}).
 		UpdateColumn("failed_logins", gorm.Expr("failed_logins + ?", 1))
 
 	if result.Error != nil {
@@ -113,11 +127,6 @@ func IncrementFailedLogin(db *gorm.DB, userID uint) (int64, error) {
 	}
 	if result.RowsAffected == 0 {
 		return 0, gorm.ErrRecordNotFound
-	}
-
-	// Recupera o valor atualizado
-	if err := db.Select("failed_logins").First(&user, userID).Error; err != nil {
-		return 0, err
 	}
 
 	return int64(user.FailedLogins), nil
