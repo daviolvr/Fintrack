@@ -1,8 +1,6 @@
 package router
 
 import (
-	"database/sql"
-
 	"github.com/daviolvr/Fintrack/api/handlers"
 	"github.com/daviolvr/Fintrack/api/middlewares"
 	"github.com/daviolvr/Fintrack/internal/cache"
@@ -10,9 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/gorm"
 )
 
-func SetupRoutes(r *gin.Engine, db *sql.DB, cache *cache.Cache) {
+func SetupRoutes(r *gin.Engine, db *gorm.DB, cache *cache.Cache) {
 	// Inicializa serviços
 	authService := services.NewAuthService(db)
 	userService := services.NewUserService(db, cache)

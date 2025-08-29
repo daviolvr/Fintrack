@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"errors"
 	"os"
 	"time"
@@ -12,13 +11,14 @@ import (
 	"github.com/daviolvr/Fintrack/internal/repository"
 	"github.com/daviolvr/Fintrack/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	DB *sql.DB
+	DB *gorm.DB
 }
 
-func NewAuthService(db *sql.DB) *AuthService {
+func NewAuthService(db *gorm.DB) *AuthService {
 	return &AuthService{DB: db}
 }
 
