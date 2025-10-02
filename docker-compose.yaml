@@ -5,9 +5,9 @@ services:
       context: ./backend
       dockerfile: docker/Dockerfile
     ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
+      - 8001:8001
     env_file: 
-      - ./.env.docker
+      - .env.docker
     depends_on:
       postgres:
         condition: service_healthy
@@ -16,7 +16,7 @@ services:
     image: redis:7.2-alpine
     container_name: fintrack-redis
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - 6379:6379
     volumes:
       - redis-data:/data
       - ./backend/docker/redis.conf:/usr/local/etc/redis/redis.conf
@@ -35,7 +35,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 10

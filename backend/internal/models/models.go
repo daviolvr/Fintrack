@@ -9,7 +9,7 @@ type User struct {
 	FirstName    string     `gorm:"not null;size:100" json:"first_name"`
 	LastName     string     `gorm:"not null;size:100" json:"last_name"`
 	Email        string     `gorm:"unique;not null;size:100" json:"email"`
-	Password     string     `gorm:"not null;size:255" json:"-"`
+	Password     string     `gorm:"column:password_hash;not null;size:255" json:"-"`
 	Balance      float64    `gorm:"default:0" json:"balance"`
 	FailedLogins uint       `gorm:"default:0" json:"failed_logins"`
 	LockedUntil  *time.Time `json:"locked_until,omitempty"`
