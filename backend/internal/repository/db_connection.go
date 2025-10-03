@@ -17,7 +17,7 @@ func ConnectToDB() (*gorm.DB, error) {
 	dbname := os.Getenv("POSTGRES_DB")
 
 	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=America/Fortaleza",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=America/Sao_Paulo",
 		host, port, user, password, dbname,
 	)
 
