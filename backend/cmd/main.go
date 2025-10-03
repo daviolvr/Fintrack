@@ -28,7 +28,7 @@ func main() {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("Erro ao pegar conex'ao subjacente: %v", err)
+		log.Fatalf("Erro ao pegar conexão subjacente: %v", err)
 	}
 	defer sqlDB.Close()
 
