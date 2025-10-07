@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import background from "../assets/images/register-login-background.jpg";
 import logo from "../assets/images/logo_fintrack.png";
 import { loginUser } from "../api/user_api";
+
+const MESSAGES = {
+    REQUIRED_FIELDS: "Todos os campos são obrigatórios",
+    INVALID_EMAIL: "Por favor, insira um email válido",
+    LOGIN_SUCCESS: "Login realizado com sucesso!",
+    LOGIN_ERROR: "Erro ao fazer login"
+};
 
 export default function Login() {
     const navigate = useNavigate();
@@ -28,13 +35,13 @@ export default function Login() {
     // validar formulario
     const validateForm = () => {
         if (!form.email || !form.password) {
-            setMessage("Todos os campos são obrigatórios");
+            setMessage(MESSAGES.REQUIRED_FIELDS);
             return false;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(form.email)) {
-            setMessage("Por favor, insira um emáil válido");
+            setMessage(MESSAGES.INVALID_EMAIL);
             return false;
         }
 
@@ -57,12 +64,12 @@ export default function Login() {
                 password: form.password
             });
 
-            setMessage("Login realizado com sucesso!");
+            setMessage(MESSAGES.LOGIN_SUCCESS);
 
             // Redireciona para a página de dashboard
             navigate("/dashboard");
         } catch(error) {
-            setMessage(error.message || "Erro ao fazer login");
+            setMessage(error.message || MESSAGES.LOGIN_ERROR);
             setForm({
                 email: "",
                 password: "",

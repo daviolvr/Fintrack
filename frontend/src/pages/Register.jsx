@@ -1,9 +1,18 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Register.css";
 import background from "../assets/images/register-login-background.jpg";
 import logo from "../assets/images/logo_fintrack.png";
 import { registerUser } from "../api/user_api";
+
+const MESSAGES = {
+    REQUIRED_FIELDS: "Todos os campos são obrigatórios",
+    INVALID_EMAIL: "Por favor, insira um email válido",
+    MISMATCHING_PASSWORDS: "As senhas não coincidem",
+    INVALID_PASSWORD: "A senha deve ter pelo menos 8 caracteres",
+    REGISTER_SUCCESS: "Cadastro realizado com sucesso!",
+    REGISTER_ERROR: "Erro ao cadastrar usuário"
+};
 
 export default function Register() {
     const navigate = useNavigate();
@@ -48,22 +57,22 @@ export default function Register() {
     // validar formulário
     const validateForm = () => {
         if (!form.firstName || !form.lastName || !form.email || !form.password) {
-            setMessage("Todos os campos são obrigatórios");
+            setMessage(MESSAGES.REQUIRED_FIELDS);
             return false;
         }
 
         if (form.password !== form.confirmPassword) {
-            setMessage("As senhas não coincidem");
+            setMessage(MESSAGES.MISMATCHING_PASSWORDS);
             return false;
         }
 
         if (form.password.length < 8) {
-            setMessage("A senha deve ter pelo menos 8 caracteres");
+            setMessage(MESSAGES.INVALID_PASSWORD);
             return false;
         }
 
         if (!validateEmailDomain(form.email)) {
-            setMessage("Por favor, use um email do Gmail ou Outlook");
+            setMessage(MESSAGES.INVALID_EMAIL);
             return false;
         }
 
@@ -90,13 +99,13 @@ export default function Register() {
 
             await registerUser(userData);
 
-            setMessage("Cadastro realizado com sucesso!");
+            setMessage(MESSAGES.REGISTER_SUCCESS);
             
             setTimeout(() => {
                 navigate("/dashboard");
             }, 2000);
         } catch (error) {
-            setMessage(error.message || "Erro ao cadastrar usuário");
+            setMessage(error.message || MESSAGES.REGISTER_ERROR);
             setForm({
                 firstName: "",
                 lastName: "",
