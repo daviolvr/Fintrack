@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Register.css";
 import background from "../assets/images/register-login-background.jpg";
 import logo from "../assets/images/logo_fintrack.png";
 import { registerUser } from "../api/user_api";
 
 export default function Register() {
+    const navigate = useNavigate();
+
     // estados para os inputs
     const [form, setForm] = useState({
         firstName: "",
@@ -88,8 +91,12 @@ export default function Register() {
             await registerUser(userData);
 
             setMessage("Cadastro realizado com sucesso!");
-
-            // Limpar formulario
+            
+            setTimeout(() => {
+                navigate("/dashboard");
+            }, 2000);
+        } catch (error) {
+            setMessage(error.message || "Erro ao cadastrar usuário");
             setForm({
                 firstName: "",
                 lastName: "",
@@ -97,8 +104,6 @@ export default function Register() {
                 password: "",
                 confirmPassword: "",
             });
-        } catch (error) {
-            setMessage(error.message || "Erro ao cadastrar usuário");
         } finally {
             setLoading(false);
         }
