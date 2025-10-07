@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import background from "../assets/images/register-login-background.jpg";
 import logo from "../assets/images/logo_fintrack.png";
 import { loginUser } from "../api/user_api";
 
 export default function Login() {
+    const navigate = useNavigate();
+
     // estados para os inputs
     const [form, setForm] = useState({
         email: "",
@@ -68,6 +71,11 @@ export default function Login() {
         }
     };
 
+    // função para redirecionar para register
+    const handleRegisterClick = () => {
+        navigate("/register");
+    }
+
     return (
         <div
             className="login-container"
@@ -110,9 +118,11 @@ export default function Login() {
                     />
                 </div>
 
-                <button type="submit" disabled={loading}>
+                <button className="login-button" type="submit" disabled={loading}>
                     {loading ? "Fazendo login..." : "Login"}
                 </button>
+
+                <button type="button" className="register-button" onClick={handleRegisterClick}>Criar uma conta</button>
             </form>
         </div>
     );
