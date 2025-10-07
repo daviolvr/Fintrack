@@ -1,3 +1,7 @@
+:root {
+    --fintrack-base-color: #405b6b;
+}
+
 .login-container {
     min-height: 100vh;
     background-size: cover;
@@ -62,7 +66,7 @@
 
 .login-button {
     padding: 0.75rem;
-    background-color: #405b6b;
+    background-color: var(--fintrack-base-color);
     color: white;
     border: none;
     border-radius: 6px;
@@ -102,6 +106,7 @@
     border: none;
     font-size: 0.9rem;
     cursor: pointer;
+    color: var(--fintrack-base-color);
 }
 
 .register-button:hover {

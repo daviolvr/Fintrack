@@ -59,13 +59,14 @@ export default function Login() {
 
             setMessage("Login realizado com sucesso!");
 
-            // Limpar formulario
+            // Redireciona para a página de dashboard
+            navigate("/dashboard");
+        } catch(error) {
+            setMessage(error.message || "Erro ao fazer login");
             setForm({
                 email: "",
                 password: "",
             });
-        } catch(error) {
-            setMessage(error.message || "Erro ao fazer login");
         } finally {
             setLoading(false);
         }
