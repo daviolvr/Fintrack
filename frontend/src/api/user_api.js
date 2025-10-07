@@ -1,6 +1,4 @@
-import { use } from "react";
-
-const API_BASE_URL = "http://localhost:8001/api/v1";
+const API_BASE_URL = "http://localhost:8000/api/v1";
 
 // Função para registrar usuário
 export const registerUser = async (userData) => {

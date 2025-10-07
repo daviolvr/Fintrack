@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../styles/Login.css";
 import background from "../assets/images/register-login-background.jpg";
+import logo from "../assets/images/logo_fintrack.png";
 import { loginUser } from "../api/user_api";
 
 export default function Login() {
@@ -73,9 +74,10 @@ export default function Login() {
             style={{ backgroundImage: `url(${background})` }}
         >
             <form onSubmit={handleSubmit} className="login-form">
-                <h2>Login</h2>
+                <img src={logo} alt="fintrack-logo" className="logo-image" />
 
-                {/* Adicione esta parte para mostrar mensagens */}
+                {/* <h2>Login</h2> */}
+
                 {message && (
                     <div className={`message ${message.includes("sucesso") ? "success" : "error"}`}>
                         {message}
